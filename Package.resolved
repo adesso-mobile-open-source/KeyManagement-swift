@@ -1,0 +1,33 @@
+{
+  "originHash" : "99acf6c44c61900c17e610b768c2991cc87bf2436212cdcd88561cdafc282836",
+  "pins" : [
+    {
+      "identity" : "persistentstorage-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/adesso-mobile-open-source/PersistentStorage-swift",
+      "state" : {
+        "revision" : "4f3e755d43f5ea4aa322ed6f0dee3c9b28e55a39",
+        "version" : "1.0.3"
+      }
+    },
+    {
+      "identity" : "swift-spyable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Matejkob/swift-spyable",
+      "state" : {
+        "revision" : "5ee55d370fcbd1c4f5f29932876799c16e9647c4",
+        "version" : "0.9.0"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "64889f0c732f210a935a0ad7cda38f77f876262d",
+        "version" : "509.1.1"
+      }
+    }
+  ],
+  "version" : 3
+}

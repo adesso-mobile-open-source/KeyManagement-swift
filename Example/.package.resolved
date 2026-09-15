@@ -1,0 +1,87 @@
+{
+  "originHash" : "3882133120b4cae9275b81c4a5a1db1e04d71d38c535b0928afbc5b95ecf5df7",
+  "pins" : [
+    {
+      "identity" : "dictionarycoder",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/almazrafi/DictionaryCoder.git",
+      "state" : {
+        "revision" : "b3d069fcace8200c041bd3978737d2780772e4be",
+        "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "extensions",
+      "kind" : "remoteSourceControl",
+      "location" : "git@gitlab.adesso-group.com:ams/intern/ios/foundation-libs/extensions.git",
+      "state" : {
+        "revision" : "54288cb0931fe19a61c3a3524c5d24917d0977f4",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "keychainaccess",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kishikawakatsumi/KeychainAccess",
+      "state" : {
+        "revision" : "84e546727d66f1adc5439debad16270d0fdd04e7",
+        "version" : "4.2.2"
+      }
+    },
+    {
+      "identity" : "log",
+      "kind" : "remoteSourceControl",
+      "location" : "git@gitlab.adesso-group.com:ams/intern/ios/foundation-libs/log.git",
+      "state" : {
+        "revision" : "c29f34e57331f1b5e84e2ed69c75dddd5e9bdd58",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "persistentstorage",
+      "kind" : "remoteSourceControl",
+      "location" : "git@gitlab.adesso-group.com:ams/intern/ios/foundation-libs/persistentstorage.git",
+      "state" : {
+        "revision" : "c46960be48ccb0ff84f16cfc324237723d9e04bb",
+        "version" : "1.0.1"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "a878e7f8f46cfc0e1125e565b5c08e7d5272dc9a",
+        "version" : "1.14.0"
+      }
+    },
+    {
+      "identity" : "swift-log-oslog",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/chrisaljoudi/swift-log-oslog.git",
+      "state" : {
+        "revision" : "176d41d46429e79c806333025b226e0c50a0c602",
+        "version" : "0.2.2"
+      }
+    },
+    {
+      "identity" : "swift-spyable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Matejkob/swift-spyable",
+      "state" : {
+        "revision" : "5ee55d370fcbd1c4f5f29932876799c16e9647c4",
+        "version" : "0.9.0"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax.git",
+      "state" : {
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
+      }
+    }
+  ],
+  "version" : 3
+}
