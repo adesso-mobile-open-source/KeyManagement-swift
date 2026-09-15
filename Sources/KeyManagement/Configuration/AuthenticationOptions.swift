@@ -53,7 +53,7 @@ struct AuthenticationOptions: OptionSet, Sendable {
 
     /// Constraint logic operation: when using more than one constraint,
     /// at least one of them must be satisfied.
-    static let or = Self(rawValue: 1 << 14)  // swiftlint:disable:this identifier_name
+    static let or = Self(rawValue: 1 << 14)
 
     /// Constraint logic operation: when using more than one constraint,
     /// all must be satisfied.
