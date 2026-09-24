@@ -1,3 +1,4 @@
+// copyright-header:allow-exception
 //
 //  KeyManagement
 //
