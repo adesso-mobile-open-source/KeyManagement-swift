@@ -24,10 +24,14 @@ public protocol KeyManagerPasscodeOperations: Sendable {
     /// Explicitly creates the key pair for a ``PasscodeProtectedKey`` and returns
     /// the DER-encoded public key.
     ///
+    /// The Secure Enclave may present the system passcode UI as part of key
+    /// creation, which blocks the calling thread for as long as it is on
+    /// screen. Isolated to ``KeyManagementActor`` — never the main actor.
+    ///
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    func create<K: PasscodeProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create<K: PasscodeProtectedKey>(key: K) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``PasscodeProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
@@ -37,21 +41,39 @@ public protocol KeyManagerPasscodeOperations: Sendable {
     /// Signs `payload` using a ``PasscodeProtectedKey``. The system presents its
     /// own passcode UI automatically.
     ///
+    /// This call blocks the calling thread for as long as the passcode prompt
+    /// is on screen, exactly like biometric authentication. Isolated to
+    /// ``KeyManagementActor`` — never the main actor. Call with `await`.
+    ///
     /// - Throws: ``SignPasscodeError``
-    func sign<K: PasscodeProtectedKey>(payload: Data, with key: K) throws(SignPasscodeError) -> Data
+    @KeyManagementActor func sign<K: PasscodeProtectedKey>(payload: Data, with key: K) throws(SignPasscodeError) -> Data
 
     /// Performs ECDH key agreement using a ``PasscodeProtectedKey``. The system
     /// presents its own passcode UI automatically.
     ///
+    /// This call blocks the calling thread for as long as the passcode prompt
+    /// is on screen, exactly like biometric authentication. Isolated to
+    /// ``KeyManagementActor`` — never the main actor. Call with `await`.
+    ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DerivePasscodeError``
-    func deriveSharedSecret<K: PasscodeProtectedKey>(with key: K, publicKey: Data) throws(DerivePasscodeError) -> Data
+    @KeyManagementActor func deriveSharedSecret<K: PasscodeProtectedKey>(
+        with key: K,
+        publicKey: Data
+    ) throws(DerivePasscodeError) -> Data
 
     /// Decrypts ECIES data using a ``PasscodeProtectedKey``. The system presents
     /// its own passcode UI automatically.
     ///
+    /// This call blocks the calling thread for as long as the passcode prompt
+    /// is on screen, exactly like biometric authentication. Isolated to
+    /// ``KeyManagementActor`` — never the main actor. Call with `await`.
+    ///
     /// - Throws: ``DecryptPasscodeError``
-    func decrypt<K: PasscodeProtectedKey>(encodedData: Data, with key: K) throws(DecryptPasscodeError) -> Data
+    @KeyManagementActor func decrypt<K: PasscodeProtectedKey>(
+        encodedData: Data,
+        with key: K
+    ) throws(DecryptPasscodeError) -> Data
 }
 
 /// ``KeyManager`` requirements for ``UnprotectedKey`` operations.

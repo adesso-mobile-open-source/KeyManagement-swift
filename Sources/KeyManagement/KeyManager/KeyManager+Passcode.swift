@@ -14,7 +14,7 @@ import Foundation
 
 extension KeyManagerImpl {
 
-    public func create<K: PasscodeProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+    @KeyManagementActor public func create<K: PasscodeProtectedKey>(key: K) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
         }
@@ -40,7 +40,10 @@ extension KeyManagerImpl {
         }
     }
 
-    public func sign<K: PasscodeProtectedKey>(payload: Data, with key: K) throws(SignPasscodeError) -> Data {
+    @KeyManagementActor public func sign<K: PasscodeProtectedKey>(
+        payload: Data,
+        with key: K
+    ) throws(SignPasscodeError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
         }
@@ -54,8 +57,10 @@ extension KeyManagerImpl {
         }
     }
 
-    public func deriveSharedSecret<K: PasscodeProtectedKey>(with key: K, publicKey: Data) throws(DerivePasscodeError)
-        -> Data {
+    @KeyManagementActor public func deriveSharedSecret<K: PasscodeProtectedKey>(
+        with key: K,
+        publicKey: Data
+    ) throws(DerivePasscodeError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
         }
@@ -69,7 +74,10 @@ extension KeyManagerImpl {
         } catch { throw .derivationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func decrypt<K: PasscodeProtectedKey>(encodedData: Data, with key: K) throws(DecryptPasscodeError) -> Data {
+    @KeyManagementActor public func decrypt<K: PasscodeProtectedKey>(
+        encodedData: Data,
+        with key: K
+    ) throws(DecryptPasscodeError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)

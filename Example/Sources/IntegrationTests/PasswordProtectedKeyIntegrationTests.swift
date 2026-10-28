@@ -187,7 +187,7 @@ struct PasswordProtectedKeyIntegrationTests {
     // MARK: - configurationMismatch
 
     @Test("Using same key name with different trait throws configurationMismatch")
-    @BiometryActor
+    @KeyManagementActor
     func configurationMismatch_differentTrait() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         struct BiometryKey: BiometryAnyProtectedKey { let name = "integration.password.signing" }

@@ -240,7 +240,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     // MARK: - BiometryAnyProtectedKey
 
     /// Explicitly creates the key pair for a ``BiometryAnyProtectedKey`` and
-    /// returns the DER-encoded public key. Isolated to ``BiometryActor`` — never the main actor.
+    /// returns the DER-encoded public key. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// Use this when you need the public key immediately — for example, to
     /// register it with a backend — before performing any signing or decryption.
@@ -248,7 +248,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @BiometryActor func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``BiometryAnyProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
@@ -256,37 +256,37 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     func encrypt<K: BiometryAnyProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``BiometryAnyProtectedKey`` after biometric
-    /// authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// Pass `nil` for `laContext` to let the system show a biometric prompt.
     /// Pass a pre-evaluated context to avoid a second prompt.
     ///
     /// - Throws: ``SignBiometryAnyError``
-    @BiometryActor func sign<K: BiometryAnyProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign<K: BiometryAnyProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
         throws(SignBiometryAnyError) -> Data
 
     /// Performs ECDH key agreement using a ``BiometryAnyProtectedKey`` after
-    /// biometric authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// biometric authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveBiometryAnyError``
-    @BiometryActor func deriveSharedSecret<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor func deriveSharedSecret<K: BiometryAnyProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveBiometryAnyError) -> Data
 
     /// Decrypts ECIES data using a ``BiometryAnyProtectedKey`` after biometric
-    /// authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptBiometryAnyError``
-    @BiometryActor func decrypt<K: BiometryAnyProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func decrypt<K: BiometryAnyProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
         throws(DecryptBiometryAnyError) -> Data
 
     // MARK: - BiometryCurrentSetProtectedKey
 
     /// Explicitly creates the key pair for a ``BiometryCurrentSetProtectedKey``
-    /// and returns the DER-encoded public key. Isolated to ``BiometryActor`` — never the main actor.
+    /// and returns the DER-encoded public key. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// Also stores the current biometric enrollment baseline so that
     /// ``hasBiometricEnrollmentChanged(for:)`` can detect future enrollment
@@ -295,7 +295,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @BiometryActor func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``BiometryCurrentSetProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
@@ -303,32 +303,32 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     func encrypt<K: BiometryCurrentSetProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``BiometryCurrentSetProtectedKey`` after biometric
-    /// authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// Checks ``hasBiometricEnrollmentChanged(for:)`` before signing and throws
     /// ``SignBiometryCurrentSetError/enrollmentChanged(name:)`` if the enrolled
     /// biometrics have changed.
     ///
     /// - Throws: ``SignBiometryCurrentSetError``
-    @BiometryActor func sign<K: BiometryCurrentSetProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign<K: BiometryCurrentSetProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
         throws(SignBiometryCurrentSetError) -> Data
 
     /// Performs ECDH key agreement using a ``BiometryCurrentSetProtectedKey``
-    /// after biometric authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// after biometric authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveBiometryCurrentSetError``
-    @BiometryActor func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveBiometryCurrentSetError) -> Data
 
     /// Decrypts ECIES data using a ``BiometryCurrentSetProtectedKey`` after
-    /// biometric authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// biometric authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptBiometryCurrentSetError``
-    @BiometryActor func decrypt<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor func decrypt<K: BiometryCurrentSetProtectedKey>(
         encodedData: Data,
         with key: K,
         laContext: LAContext?
@@ -337,12 +337,12 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     // MARK: - UserPresenceProtectedKey
 
     /// Explicitly creates the key pair for a ``UserPresenceProtectedKey`` and
-    /// returns the DER-encoded public key. Isolated to ``BiometryActor`` — never the main actor.
+    /// returns the DER-encoded public key. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @BiometryActor func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``UserPresenceProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
@@ -350,27 +350,27 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     func encrypt<K: UserPresenceProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``UserPresenceProtectedKey`` after biometric or
-    /// passcode authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// passcode authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``SignUserPresenceError``
-    @BiometryActor func sign<K: UserPresenceProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign<K: UserPresenceProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
         throws(SignUserPresenceError) -> Data
 
     /// Performs ECDH key agreement using a ``UserPresenceProtectedKey`` after
-    /// biometric or passcode authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// biometric or passcode authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveUserPresenceError``
-    @BiometryActor func deriveSharedSecret<K: UserPresenceProtectedKey>(
+    @KeyManagementActor func deriveSharedSecret<K: UserPresenceProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveUserPresenceError) -> Data
 
     /// Decrypts ECIES data using a ``UserPresenceProtectedKey`` after biometric
-    /// or passcode authentication. Isolated to ``BiometryActor`` — never the main actor.
+    /// or passcode authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptUserPresenceError``
-    @BiometryActor func decrypt<K: UserPresenceProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func decrypt<K: UserPresenceProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
         throws(DecryptUserPresenceError) -> Data
 }

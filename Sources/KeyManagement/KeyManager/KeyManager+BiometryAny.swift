@@ -14,7 +14,7 @@ import LocalAuthentication
 
 extension KeyManagerImpl {
 
-    @BiometryActor public func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+    @KeyManagementActor public func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryAny) {
             throw .configurationMismatch(name: key.name)
         }
@@ -25,7 +25,7 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    @BiometryActor public func sign<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor public func sign<K: BiometryAnyProtectedKey>(
         payload: Data,
         with key: K,
         laContext: LAContext? = nil
@@ -49,7 +49,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func deriveSharedSecret<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor public func deriveSharedSecret<K: BiometryAnyProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext? = nil
@@ -92,7 +92,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func decrypt<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor public func decrypt<K: BiometryAnyProtectedKey>(
         encodedData: Data,
         with key: K,
         laContext: LAContext? = nil

@@ -14,7 +14,7 @@ import LocalAuthentication
 
 extension KeyManagerImpl {
 
-    @BiometryActor public func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+    @KeyManagementActor public func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryCurrentSet) {
             throw .configurationMismatch(name: key.name)
         }
@@ -52,7 +52,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func sign<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor public func sign<K: BiometryCurrentSetProtectedKey>(
         payload: Data,
         with key: K,
         laContext: LAContext? = nil
@@ -77,7 +77,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor public func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext? = nil
@@ -106,7 +106,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func decrypt<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor public func decrypt<K: BiometryCurrentSetProtectedKey>(
         encodedData: Data,
         with key: K,
         laContext: LAContext? = nil
@@ -136,7 +136,7 @@ extension KeyManagerImpl {
 
     /// Auto-creates the key if missing and verifies the biometric enrollment
     /// baseline has not changed, mapping any failure to the operation's error type.
-    @BiometryActor private func ensureKeyAndEnrollment<K: BiometryCurrentSetProtectedKey, E: Error>(
+    @KeyManagementActor private func ensureKeyAndEnrollment<K: BiometryCurrentSetProtectedKey, E: Error>(
         for key: K,
         keyCreationFailed: (String) -> E,
         enrollmentChanged: (String) -> E,

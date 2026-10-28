@@ -18,11 +18,11 @@ import Testing
 
 @testable import KeyManagement
 
-@Suite("KeyManager — BiometryAnyProtectedKey") struct KeyManagerBiometryAnyTests {
+@Suite("KeyManager — BiometryAnyProtectedKey") @KeyManagementActor struct KeyManagerBiometryAnyTests {
 
     struct TestKey: BiometryAnyProtectedKey { let name = "TestKey" }
 
-    @Test("Auto-creates key on first sign when absent") @BiometryActor func autoCreatesOnFirstSign() throws {
+    @Test("Auto-creates key on first sign when absent") func autoCreatesOnFirstSign() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         let mgr = makeManager(store: store)
@@ -30,7 +30,7 @@ import Testing
         #expect(store.createCallCount == 1)
     }
 
-    @Test("Does not re-create when key already exists") @BiometryActor func doesNotRecreate() throws {
+    @Test("Does not re-create when key already exists") func doesNotRecreate() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store)
@@ -38,7 +38,7 @@ import Testing
         #expect(store.createCallCount == 0)
     }
 
-    @Test("Throws configurationMismatch when trait differs") @BiometryActor func throwsConfigMismatch() throws {
+    @Test("Throws configurationMismatch when trait differs") func throwsConfigMismatch() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store, storedTrait: .password)
@@ -47,7 +47,7 @@ import Testing
         }
     }
 
-    @Test("Maps userCancelled store error") @BiometryActor func mapsUserCancelled() throws {
+    @Test("Maps userCancelled store error") func mapsUserCancelled() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         store.signError = .userCancelled(name: "TestKey")
@@ -57,7 +57,7 @@ import Testing
         }
     }
 
-    @Test("Maps biometryLockout store error") @BiometryActor func mapsBiometryLockout() throws {
+    @Test("Maps biometryLockout store error") func mapsBiometryLockout() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         store.signError = .biometryLockout(name: "TestKey")
@@ -67,7 +67,7 @@ import Testing
         }
     }
 
-    @Test("Decrypt rejects short payload") @BiometryActor func decryptRejectsShortPayload() throws {
+    @Test("Decrypt rejects short payload") func decryptRejectsShortPayload() throws {
         let mgr = makeManager(store: KeyStoreSpy())
         #expect(throws: DecryptBiometryAnyError.invalidPayload) {
             try mgr.decrypt(encodedData: Data(repeating: 0, count: 81), with: TestKey(), laContext: nil)

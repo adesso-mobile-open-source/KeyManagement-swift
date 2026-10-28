@@ -14,7 +14,7 @@ import LocalAuthentication
 
 extension KeyManagerImpl {
 
-    @BiometryActor public func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+    @KeyManagementActor public func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .userPresence) {
             throw .configurationMismatch(name: key.name)
         }
@@ -40,7 +40,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func sign<K: UserPresenceProtectedKey>(
+    @KeyManagementActor public func sign<K: UserPresenceProtectedKey>(
         payload: Data,
         with key: K,
         laContext: LAContext? = nil
@@ -64,7 +64,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func deriveSharedSecret<K: UserPresenceProtectedKey>(
+    @KeyManagementActor public func deriveSharedSecret<K: UserPresenceProtectedKey>(
         with key: K,
         publicKey: Data,
         laContext: LAContext? = nil
@@ -92,7 +92,7 @@ extension KeyManagerImpl {
         }
     }
 
-    @BiometryActor public func decrypt<K: UserPresenceProtectedKey>(
+    @KeyManagementActor public func decrypt<K: UserPresenceProtectedKey>(
         encodedData: Data,
         with key: K,
         laContext: LAContext? = nil

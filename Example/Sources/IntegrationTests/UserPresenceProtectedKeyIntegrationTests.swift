@@ -23,6 +23,7 @@ import LocalAuthentication
 import Testing
 
 @Suite("UserPresenceProtectedKey — Integration")
+@KeyManagementActor
 struct UserPresenceProtectedKeyIntegrationTests {
 
     struct UserPresenceSigningKey: UserPresenceProtectedKey { let name = "integration.userPresence.signing" }
@@ -37,7 +38,6 @@ struct UserPresenceProtectedKeyIntegrationTests {
         try? manager.removeKey(UserPresenceDeriveKey())
     }
 
-    @BiometryActor
     private func evaluatedContext(reason: String) async throws -> LAContext {
         let ctx = LAContext()
         try await ctx.evaluatePolicy(.deviceOwnerAuthentication, localizedReason: reason)
@@ -47,7 +47,6 @@ struct UserPresenceProtectedKeyIntegrationTests {
     // MARK: - sign roundtrip
 
     @Test("sign produces a verifiable ECDSA signature")
-    @BiometryActor
     func sign_producesVerifiableSignature() async throws {
         defer { try? manager.removeKey(UserPresenceSigningKey()) }
         let payload = Data("UserPresence integration payload".utf8)
@@ -61,7 +60,6 @@ struct UserPresenceProtectedKeyIntegrationTests {
     // MARK: - encrypt / decrypt roundtrip
 
     @Test("encrypt then decrypt recovers original plaintext")
-    @BiometryActor
     func encrypt_decrypt_roundtrip() async throws {
         defer { try? manager.removeKey(UserPresenceDecryptKey()) }
         let plaintext = Data("UserPresence secret 🔑".utf8)
@@ -74,7 +72,6 @@ struct UserPresenceProtectedKeyIntegrationTests {
     }
 
     @Test("decrypt with short payload throws invalidPayload without prompting")
-    @BiometryActor
     func decrypt_shortPayloadThrowsInvalidPayload() throws {
         defer { try? manager.removeKey(UserPresenceDecryptKey()) }
         #expect(throws: DecryptUserPresenceError.invalidPayload) {
@@ -89,7 +86,6 @@ struct UserPresenceProtectedKeyIntegrationTests {
     // MARK: - deriveSharedSecret roundtrip
 
     @Test("deriveSharedSecret matches the ephemeral-side computation")
-    @BiometryActor
     func deriveSharedSecret_matchesEphemeralSide() async throws {
         defer { try? manager.removeKey(UserPresenceDeriveKey()) }
         let ctx1 = try await evaluatedContext(reason: "Create key — UserPresence derive")

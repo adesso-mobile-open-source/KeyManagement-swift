@@ -34,9 +34,9 @@ import Spyable
 /// > Note: The Apple documentation copied below explicitly warns that
 /// > operations on access-control-protected keys can block the calling
 /// > thread. This library honours that warning by isolating every
-/// > biometry-gated `KeyManager` operation to ``BiometryActor`` — a
+/// > biometry-gated `KeyManager` operation to ``KeyManagementActor`` — a
 /// > dedicated background actor — instead of `MainActor`. See
-/// > ``BiometryActor`` for details.
+/// > ``KeyManagementActor`` for details.
 @Spyable(behindPreprocessorFlag: "DEBUG") public protocol SecurityProxy: Sendable {
     /// @function secAccessControlCreateWithFlags
     /// @abstract Creates new access control object based on protection type and additional flags.

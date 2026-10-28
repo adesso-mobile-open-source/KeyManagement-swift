@@ -30,7 +30,7 @@ The same applies to `BiometryCurrentSetProtectedKey`, `PasscodeProtectedKey`, `U
 
 ### PasswordProtectedKey — plain overload does not auto-create
 
-For `PasswordProtectedKey`, the plain `encrypt(data:with:)` overload requires the key to already exist. Use `sign`, `decrypt`, or `create` first, or use the dedicated `generateKeyWithPassword` overload:
+For `PasswordProtectedKey`, the plain `encrypt(data:with:)` overload requires the key to already exist. Use `create` first, or use the dedicated `generateKeyWithPassword` overload:
 
 ```swift
 struct PasswordEncKey: PasswordProtectedKey {
@@ -41,7 +41,7 @@ let password = Data("my-password".utf8)
 let plaintext = Data("sensitive data".utf8)
 
 // Option A: ensure the key exists first
-_ = try manager.sign(payload: Data("init".utf8), with: PasswordEncKey(), password: password)
+_ = try manager.create(key: PasswordEncKey(), password: password)
 let ciphertext = try manager.encrypt(data: plaintext, with: PasswordEncKey())
 
 // Option B: auto-creating overload
@@ -82,7 +82,7 @@ struct BiometricRegKey: BiometryAnyProtectedKey {
     let name = "com.example.app.biometric"
 }
 
-// Isolated to BiometryActor — await it directly, no manual actor hop needed
+// Isolated to KeyManagementActor — await it directly, no manual actor hop needed
 let publicKeyDER = try await manager.create(key: BiometricRegKey())
 ```
 
@@ -101,7 +101,7 @@ let recovered = try manager.decrypt(
 assert(recovered == plaintext)
 ```
 
-### Biometry key (`BiometryActor`)
+### Biometry key (`KeyManagementActor`)
 
 ```swift
 struct BiometricEncKey: BiometryAnyProtectedKey {
@@ -109,7 +109,7 @@ struct BiometricEncKey: BiometryAnyProtectedKey {
 }
 
 // Biometric prompt shown automatically. `decrypt` is isolated to
-// BiometryActor, so it must be awaited.
+// KeyManagementActor, so it must be awaited.
 let recovered = try await manager.decrypt(
     encodedData: ciphertext,
     with: BiometricEncKey(),
@@ -117,15 +117,17 @@ let recovered = try await manager.decrypt(
 )
 ```
 
-### Passcode key
+### Passcode key (`KeyManagementActor`)
 
 ```swift
 struct PasscodeEncKey: PasscodeProtectedKey {
     let name = "com.example.app.passcodeenc"
 }
 
-// System shows passcode UI
-let recovered = try manager.decrypt(
+// System shows passcode UI, which blocks the calling thread exactly like a
+// biometric prompt. `decrypt` is isolated to KeyManagementActor, so it must
+// be awaited.
+let recovered = try await manager.decrypt(
     encodedData: ciphertext,
     with: PasscodeEncKey()
 )
@@ -148,7 +150,7 @@ let recovered = try manager.decrypt(
 
 | Error case                             | Cause                                                                                                                                                                                                                               |
 | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `EncryptError.keyNotFound`             | `encrypt(data:with:)` called on a `PasswordProtectedKey` before the key exists. Use `sign`/`decrypt`/`create` first, or use the `generateKeyWithPassword` overload.                                                                 |
+| `EncryptError.keyNotFound`             | `encrypt(data:with:)` called on a `PasswordProtectedKey` before the key exists. Use `create` first, or use the `generateKeyWithPassword` overload.                                                                                  |
 | `EncryptError.keyCreationFailed`       | Auto-create during `encrypt` failed (all non-password traits, or the `generateKeyWithPassword` overload).                                                                                                                           |
 | `CreateKeyError.keyAlreadyExists`      | `create` was called but a key with that name already exists.                                                                                                                                                                        |
 | `CreateKeyError.creationFailed`        | Key-pair generation in the Secure Enclave failed.                                                                                                                                                                                   |
@@ -168,7 +170,7 @@ The ciphertext is produced by `SecKeyCreateEncryptedData` using `.eciesEncryptio
 
 ## Typical roundtrips
 
-### Auto-create via sign, then encrypt
+### Create, then encrypt
 
 ```swift
 struct DataKey: PasswordProtectedKey {
@@ -178,8 +180,8 @@ struct DataKey: PasswordProtectedKey {
 let password = Data("secret".utf8)
 let manager  = KeyManagerImpl(applicationTag: "com.example.app")
 
-// Step 1: ensure the key exists (sign auto-creates it)
-_ = try manager.sign(payload: Data("init".utf8), with: DataKey(), password: password)
+// Step 1: ensure the key exists
+_ = try manager.create(key: DataKey(), password: password)
 
 // Step 2: encrypt
 let plaintext  = Data("my sensitive payload".utf8)

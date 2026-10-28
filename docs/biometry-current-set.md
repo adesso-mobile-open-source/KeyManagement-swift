@@ -30,7 +30,7 @@ struct SigningKey: BiometryCurrentSetProtectedKey {
     let name = "com.example.app.currentsetsigning"
 }
 
-@BiometryActor
+@KeyManagementActor
 func performSignature(payload: Data) async throws -> Data {
     // 1. Check enrollment before attempting to use the key
     let changed = try manager.hasBiometricEnrollmentChanged(for: SigningKey())
@@ -39,6 +39,16 @@ func performSignature(payload: Data) async throws -> Data {
         try manager.removeKey(SigningKey())
         // 3. Sign: auto-creates the key and stores a new enrollment baseline.
         //    The first successful sign call after recreation is the real result.
+        //
+        //    IMPORTANT: Step 2 removed the old key pair entirely, so this
+        //    auto-create generates a BRAND-NEW key pair with a NEW public
+        //    key — it is not the same key, merely re-enrolled. The old
+        //    public key is now permanently invalid. If any third party
+        //    (e.g. a backend server) trusts the old public key, you MUST
+        //    re-enroll the new public key with that party before relying
+        //    on signatures from this key again. Use `getPublicKey(_:)`
+        //    (or the return value of `create(key:)`) to obtain the new
+        //    public key for re-registration.
         return try manager.sign(payload: payload, with: SigningKey(), laContext: nil)
     }
 
@@ -69,3 +79,4 @@ try manager.removeKey(SigningKey()) // uses the BiometryCurrentSetProtectedKey o
 1. Always call `hasBiometricEnrollmentChanged` at the start of any flow that uses a `BiometryCurrentSetProtectedKey` key.
 2. If it returns `true`, remove the key and re-create it as part of your re-authentication flow.
 3. Inform the user that they need to re-authenticate because their biometrics changed.
+4. **Re-enroll the new public key with any third party that trusted the old one.** Removing and re-creating the key does not preserve the key pair — it generates a brand-new one with a new public key. The old public key is invalidated and can no longer be used to verify signatures or encrypt data for this key. Treat this exactly like a key rotation: fetch the new public key (`getPublicKey(_:)` or the value returned by `create(key:)`) and register it with your server or any other relying party before resuming normal operation.

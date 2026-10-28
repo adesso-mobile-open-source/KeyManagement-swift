@@ -44,7 +44,7 @@
 ///
 /// ## Authentication
 ///
-/// All private-key operations are isolated to ``BiometryActor`` (never the
+/// All private-key operations are isolated to ``KeyManagementActor`` (never the
 /// main actor) and accept an optional `laContext: LAContext?` parameter —
 /// same semantics as ``BiometryAnyProtectedKey``.
 ///

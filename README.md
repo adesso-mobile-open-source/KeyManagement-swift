@@ -82,16 +82,16 @@ publicKey.isValidSignature(ecdsaSig, for: payload) // true
 
 ## Key protection traits
 
-| Protocol                         | Authentication                       | `BiometryActor` isolation |
+| Protocol                         | Authentication                       | `KeyManagementActor` isolation |
 | -------------------------------- | ------------------------------------ | ------------------------- |
 | `PasswordProtectedKey`           | Application-supplied `Data` password | No                        |
 | `BiometryAnyProtectedKey`        | Face ID / Touch ID (any enrolled)    | Yes                       |
 | `BiometryCurrentSetProtectedKey` | Currently enrolled biometrics        | Yes                       |
-| `PasscodeProtectedKey`           | Device passcode (system UI)          | No                        |
+| `PasscodeProtectedKey`           | Device passcode (system UI)          | Yes                       |
 | `UserPresenceProtectedKey`       | Biometry with passcode fallback      | Yes                       |
 | `UnprotectedKey`                 | None — device possession only        | No                        |
 
-Operations marked "Yes" are isolated to the library's `BiometryActor` — a dedicated background actor, not `MainActor`. Their underlying Secure Enclave calls block until the biometric/passcode prompt is dismissed, so they must never run on the main actor. Call them with `await`. See [Concurrency](docs/advanced.md#concurrency) for details.
+Operations marked "Yes" are isolated to the library's `KeyManagementActor` — a dedicated background actor, not `MainActor`. Their underlying Secure Enclave calls block until the biometric/passcode prompt is dismissed, so they must never run on the main actor. Call them with `await`. See [Concurrency](docs/advanced.md#concurrency) for details.
 
 See [docs/key-traits.md](docs/key-traits.md) for a detailed comparison.
 

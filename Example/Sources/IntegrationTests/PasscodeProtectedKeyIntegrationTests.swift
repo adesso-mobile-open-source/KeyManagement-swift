@@ -24,6 +24,7 @@ import KeyManagement
 import Testing
 
 @Suite("PasscodeProtectedKey — Integration")
+@KeyManagementActor
 struct PasscodeProtectedKeyIntegrationTests {
 
     struct PasscodeSigningKey: PasscodeProtectedKey { let name = "integration.passcode.signing" }
@@ -41,7 +42,7 @@ struct PasscodeProtectedKeyIntegrationTests {
     // MARK: - sign roundtrip
 
     @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() throws {
+    func sign_producesVerifiableSignature() async throws {
         defer { try? manager.removeKey(PasscodeSigningKey()) }
         let payload = Data("Passcode integration payload".utf8)
         let signature = try manager.sign(payload: payload, with: PasscodeSigningKey())
@@ -51,7 +52,7 @@ struct PasscodeProtectedKeyIntegrationTests {
     }
 
     @Test("Repeated sign calls reuse the same key")
-    func sign_secondCallReusesKey() throws {
+    func sign_secondCallReusesKey() async throws {
         defer { try? manager.removeKey(PasscodeSigningKey()) }
         let payload = Data("hello".utf8)
         _ = try manager.sign(payload: payload, with: PasscodeSigningKey())
@@ -64,7 +65,7 @@ struct PasscodeProtectedKeyIntegrationTests {
     // MARK: - encrypt / decrypt roundtrip
 
     @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() throws {
+    func encrypt_decrypt_roundtrip() async throws {
         defer { try? manager.removeKey(PasscodeDecryptKey()) }
         let plaintext = Data("Passcode-protected secret 🔑".utf8)
         _ = try manager.sign(payload: Data("x".utf8), with: PasscodeDecryptKey())
@@ -74,7 +75,7 @@ struct PasscodeProtectedKeyIntegrationTests {
     }
 
     @Test("decrypt with short payload throws invalidPayload")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    func decrypt_shortPayloadThrowsInvalidPayload() async throws {
         defer { try? manager.removeKey(PasscodeDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: PasscodeDecryptKey())
         #expect(throws: DecryptPasscodeError.invalidPayload) {
@@ -85,7 +86,7 @@ struct PasscodeProtectedKeyIntegrationTests {
     // MARK: - deriveSharedSecret roundtrip
 
     @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() throws {
+    func deriveSharedSecret_matchesEphemeralSide() async throws {
         defer { try? manager.removeKey(PasscodeDeriveKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: PasscodeDeriveKey())
         let ephemeralPriv = P256.KeyAgreement.PrivateKey()

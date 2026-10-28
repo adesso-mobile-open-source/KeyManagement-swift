@@ -19,7 +19,7 @@
 ///
 /// ## Authentication
 ///
-/// All private-key operations are isolated to ``BiometryActor`` (never the
+/// All private-key operations are isolated to ``KeyManagementActor`` (never the
 /// main actor) and accept an optional
 /// `laContext: LAContext?` parameter:
 ///
@@ -44,7 +44,7 @@
 ///     let name = "com.example.app.biometric"
 /// }
 ///
-/// // System presents a biometric prompt. `await` hops to `BiometryActor`
+/// // System presents a biometric prompt. `await` hops to `KeyManagementActor`
 /// // so the call runs off the main thread.
 /// let sig = try await manager.sign(payload: data, with: BiometricKey(), laContext: nil)
 /// ```

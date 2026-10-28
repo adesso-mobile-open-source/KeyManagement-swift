@@ -23,6 +23,7 @@ import LocalAuthentication
 import Testing
 
 @Suite("BiometryAnyProtectedKey — Integration")
+@KeyManagementActor
 struct BiometryAnyProtectedKeyIntegrationTests {
 
     struct BiometrySigningKey: BiometryAnyProtectedKey { let name = "integration.biometryAny.signing" }
@@ -37,7 +38,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
         try? manager.removeKey(BiometryDecryptKey())
     }
 
-    @BiometryActor
     private func evaluatedContext(reason: String) async throws -> LAContext {
         let ctx = LAContext()
         try await ctx.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason)
@@ -47,7 +47,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
     // MARK: - sign roundtrip
 
     @Test("sign produces a verifiable ECDSA signature")
-    @BiometryActor
     func sign_producesVerifiableSignature() async throws {
         defer { try? manager.removeKey(BiometrySigningKey()) }
         let payload = Data("Integration test payload".utf8)
@@ -59,7 +58,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
     }
 
     @Test("Repeated sign calls reuse the same key")
-    @BiometryActor
     func sign_secondCallReusesKey() async throws {
         defer { try? manager.removeKey(BiometrySigningKey()) }
         let payload = Data("hello".utf8)
@@ -75,7 +73,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
     // MARK: - encrypt / decrypt roundtrip
 
     @Test("encrypt then decrypt recovers original plaintext")
-    @BiometryActor
     func encrypt_decrypt_roundtrip() async throws {
         defer { try? manager.removeKey(BiometryDecryptKey()) }
         let plaintext = Data("Biometry-protected secret 🔑".utf8)
@@ -88,7 +85,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
     }
 
     @Test("decrypt with short payload throws invalidPayload without prompting")
-    @BiometryActor
     func decrypt_shortPayloadThrowsInvalidPayload() throws {
         defer { try? manager.removeKey(BiometryDecryptKey()) }
         #expect(throws: DecryptBiometryAnyError.invalidPayload) {
@@ -99,7 +95,6 @@ struct BiometryAnyProtectedKeyIntegrationTests {
     // MARK: - deriveSharedSecret roundtrip
 
     @Test("deriveSharedSecret matches the ephemeral-side computation")
-    @BiometryActor
     func deriveSharedSecret_matchesEphemeralSide() async throws {
         defer { try? manager.removeKey(BiometryDeriveKey()) }
         let ctx1 = try await evaluatedContext(reason: "Create key — BiometryAny")

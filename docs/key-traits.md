@@ -4,7 +4,7 @@ Each key descriptor conforms to exactly one of the six trait protocols. The trai
 
 1. **Which authentication factor** the Secure Enclave requires before permitting a private-key operation.
 2. **Which credential parameter** appears on the `KeyManager` methods.
-3. **Whether the operation is isolated to `BiometryActor`** (biometric traits perform a blocking, biometry-gated Secure Enclave call that must never run on the main thread — see [Concurrency](advanced.md#concurrency)).
+3. **Whether the operation is isolated to `KeyManagementActor`** (biometric and passcode traits perform a blocking, authentication-gated Secure Enclave call that must never run on the main thread — see [Concurrency](advanced.md#concurrency)).
 
 ---
 
@@ -16,7 +16,7 @@ The private key is protected by an application-supplied byte sequence (the "pass
 
 **Credential parameter:** `password: Data`
 
-**`BiometryActor` isolation:** No — all operations are synchronous and show no system UI.
+**`KeyManagementActor` isolation:** No — all operations are synchronous and show no system UI.
 
 **Simulator support:** Yes — `SoftwareKeyStore` emulates this trait; the password check is a byte-equality comparison in software.
 
@@ -44,7 +44,7 @@ The private key requires biometric authentication (Face ID or Touch ID). The key
 - Pass `nil` to let the system present a biometric prompt automatically.
 - Pass a pre-evaluated `LAContext` to avoid a second prompt when you have already authenticated for another reason.
 
-**`BiometryActor` isolation:** Yes — `create`, `sign`, `deriveSharedSecret`, and `decrypt` are isolated to `BiometryActor`, a dedicated background actor. Their underlying `Sec*` calls block until the biometric prompt is dismissed, so they must never run on the main actor.
+**`KeyManagementActor` isolation:** Yes — `create`, `sign`, `deriveSharedSecret`, and `decrypt` are isolated to `KeyManagementActor`, a dedicated background actor. Their underlying `Sec*` calls block until the biometric prompt is dismissed, so they must never run on the main actor.
 
 **Simulator support:** Yes, with limitations — the operation compiles and succeeds on the simulator, but no biometric check is performed. The `laContext` credential is ignored by `SoftwareKeyStore` and the private-key operation always succeeds silently. Run integration tests on a real device to verify actual biometric authentication.
 
@@ -53,7 +53,7 @@ struct BiometricKey: BiometryAnyProtectedKey {
     let name = "com.example.app.biometric"
 }
 
-// Let the system prompt the user. `sign` is isolated to `BiometryActor`,
+// Let the system prompt the user. `sign` is isolated to `KeyManagementActor`,
 // so `await` hops off the main thread automatically.
 let signature = try await manager.sign(payload: data, with: BiometricKey(), laContext: nil)
 
@@ -76,7 +76,7 @@ Like `BiometryAnyProtectedKey`, but the key is hardware-invalidated when the enr
 
 **Credential parameter:** `laContext: LAContext?` — same as `BiometryAnyProtectedKey`.
 
-**`BiometryActor` isolation:** Yes.
+**`KeyManagementActor` isolation:** Yes.
 
 **Simulator support:** Yes, with limitations — the operation compiles and succeeds on the simulator, but no biometric check is performed. The `laContext` credential is ignored by `SoftwareKeyStore` and the private-key operation always succeeds silently. Additionally, `hasBiometricEnrollmentChanged(for:)` will always return `true` on the simulator because `LAContext.evaluatedPolicyDomainState` is `nil` without real biometric hardware. Run integration tests on a real device for meaningful behaviour.
 
@@ -101,7 +101,7 @@ The private key is protected by the device passcode. The system presents its own
 
 **Credential parameter:** None.
 
-**`BiometryActor` isolation:** No — despite showing system UI, the Security framework handles thread management internally for passcode prompts.
+**`KeyManagementActor` isolation:** Yes — `create`, `sign`, `deriveSharedSecret`, and `decrypt` are isolated to `KeyManagementActor`. The `.devicePasscode` access control shows the same kind of blocking system UI as biometry, and the underlying `Sec*` calls block the calling thread for as long as the passcode prompt is on screen, so these operations must never run on the main actor. (`encrypt` is the exception — it only uses the public key and remains synchronous.)
 
 **Simulator support:** Yes, with limitations — the operation compiles and succeeds on the simulator, but no passcode check is performed and no system UI is shown. The credential is ignored by `SoftwareKeyStore` and the private-key operation always succeeds silently. Run integration tests on a real device to verify actual passcode authentication.
 
@@ -112,8 +112,9 @@ struct PasscodeKey: PasscodeProtectedKey {
     let name = "com.example.app.passcode"
 }
 
-// System shows passcode UI automatically
-let signature = try manager.sign(payload: data, with: PasscodeKey())
+// System shows passcode UI automatically. `sign` is isolated to
+// KeyManagementActor, so it must be awaited.
+let signature = try await manager.sign(payload: data, with: PasscodeKey())
 ```
 
 ---
@@ -126,7 +127,7 @@ The most permissive biometric trait. The system first attempts biometric authent
 
 **Credential parameter:** `laContext: LAContext?` — same as `BiometryAnyProtectedKey`.
 
-**`BiometryActor` isolation:** Yes.
+**`KeyManagementActor` isolation:** Yes.
 
 **Simulator support:** Yes, with limitations — the operation compiles and succeeds on the simulator, but no biometric or passcode check is performed. The `laContext` credential is ignored by `SoftwareKeyStore` and the private-key operation always succeeds silently. Run integration tests on a real device to verify actual user-presence authentication.
 
@@ -148,7 +149,7 @@ The private key is backed by the Secure Enclave but requires no user authenticat
 
 **Credential parameter:** None.
 
-**`BiometryActor` isolation:** No.
+**`KeyManagementActor` isolation:** No.
 
 **Simulator support:** Yes — `SoftwareKeyStore` emulates `UnprotectedKey` on the simulator using software P-256 keys. No access control is enforced in the emulated store.
 

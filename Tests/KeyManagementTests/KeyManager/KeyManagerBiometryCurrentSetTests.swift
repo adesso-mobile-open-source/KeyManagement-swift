@@ -18,11 +18,11 @@ import Testing
 
 @testable import KeyManagement
 
-@Suite("KeyManager — BiometryCurrentSetProtectedKey") struct KeyManagerBiometryCurrentSetTests {
+@Suite("KeyManager — BiometryCurrentSetProtectedKey") @KeyManagementActor struct KeyManagerBiometryCurrentSetTests {
 
     struct TestKey: BiometryCurrentSetProtectedKey { let name = "TestKey" }
 
-    @Test("Auto-creates key and stores enrollment baseline on first sign") @BiometryActor
+    @Test("Auto-creates key and stores enrollment baseline on first sign")
     func autoCreatesAndStoresBaseline() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
@@ -33,7 +33,7 @@ import Testing
         #expect(monitor.storeCallCount == 1)
     }
 
-    @Test("Does not re-create when key already exists") @BiometryActor func doesNotRecreate() throws {
+    @Test("Does not re-create when key already exists") func doesNotRecreate() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let monitor = KeyEnrollmentStateMonitorSpy()
@@ -43,7 +43,7 @@ import Testing
         #expect(store.createCallCount == 0)
     }
 
-    @Test("Throws enrollmentChanged when enrollment has changed") @BiometryActor func throwsEnrollmentChanged() throws {
+    @Test("Throws enrollmentChanged when enrollment has changed") func throwsEnrollmentChanged() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let monitor = KeyEnrollmentStateMonitorSpy()
@@ -54,7 +54,7 @@ import Testing
         }
     }
 
-    @Test("Throws configurationMismatch when trait differs") @BiometryActor func throwsConfigMismatch() throws {
+    @Test("Throws configurationMismatch when trait differs") func throwsConfigMismatch() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store, storedTrait: .password)
@@ -64,7 +64,7 @@ import Testing
     }
 
     @Test("removeKey clears config and enrollment baseline")
-    @BiometryActor func removeKeyClearsConfigAndBaseline() throws {
+    func removeKeyClearsConfigAndBaseline() throws {
         let store = KeyStoreSpy()
         let monitor = KeyEnrollmentStateMonitorSpy()
         let mgr = makeManager(store: store, monitor: monitor)
@@ -74,7 +74,7 @@ import Testing
     }
 
     @Test("hasBiometricEnrollmentChanged delegates to monitor")
-    @BiometryActor func hasBiometricEnrollmentChanged() throws {
+    func hasBiometricEnrollmentChanged() throws {
         let monitor = KeyEnrollmentStateMonitorSpy()
         monitor.hasChangedStub = true
         let mgr = makeManager(store: KeyStoreSpy(), monitor: monitor)
@@ -82,7 +82,7 @@ import Testing
     }
 
     @Test("Decrypt rejects short payload")
-    @BiometryActor func decryptRejectsShortPayload() throws {
+    func decryptRejectsShortPayload() throws {
         let mgr = makeManager(store: KeyStoreSpy())
         #expect(throws: DecryptBiometryCurrentSetError.invalidPayload) {
             try mgr.decrypt(encodedData: Data(repeating: 0, count: 81), with: TestKey(), laContext: nil)

@@ -18,9 +18,13 @@
 ///
 /// ## Authentication
 ///
-/// Private-key operations (`sign`, `deriveSharedSecret`, `decrypt`) take no
-/// credential parameter. The system UI is shown by the Security framework
-/// internally.
+/// Private-key operations (`create`, `sign`, `deriveSharedSecret`, `decrypt`)
+/// take no credential parameter. The system UI is shown by the Security
+/// framework internally. These calls block the calling thread for as long as
+/// the passcode prompt is on screen — exactly like biometric authentication —
+/// so they are isolated to ``KeyManagementActor`` (never the main actor). Call
+/// them with `await`. `encrypt` is the exception: it only uses the public key,
+/// requires no authentication, and remains synchronous.
 ///
 /// ## Simulator behaviour
 ///
@@ -37,8 +41,9 @@
 ///     let name = "com.example.app.passcode"
 /// }
 ///
-/// // System shows passcode UI automatically
-/// let sig = try manager.sign(payload: data, with: PasscodeKey())
+/// // System shows passcode UI automatically. `sign` is isolated to
+/// // KeyManagementActor, so it must be awaited.
+/// let sig = try await manager.sign(payload: data, with: PasscodeKey())
 /// ```
 public protocol PasscodeProtectedKey: KeyDescriptor {}
 

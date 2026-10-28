@@ -18,7 +18,7 @@ import Testing
 
 @testable import KeyManagement
 
-@Suite("KeyManager — PasscodeProtectedKey") struct KeyManagerPasscodeTests {
+@Suite("KeyManager — PasscodeProtectedKey") @KeyManagementActor struct KeyManagerPasscodeTests {
 
     struct TestKey: PasscodeProtectedKey { let name = "TestKey" }
 
