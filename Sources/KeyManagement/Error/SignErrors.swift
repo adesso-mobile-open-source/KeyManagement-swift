@@ -139,16 +139,17 @@ public enum SignPasscodeError: Error, Equatable {
     /// - Parameter error: A human-readable description of the creation failure.
     case keyCreationFailed(error: String)
 
-    /// The signing operation failed.
-    ///
-    /// This case is also used when the user dismisses the system passcode sheet,
-    /// because `PasscodeProtectedKey` operations have no dedicated `userCancelled`
-    /// case.
+    /// The signing operation failed for a reason unrelated to user cancellation.
     ///
     /// - Parameters:
     ///   - name: The logical name of the key.
     ///   - error: A human-readable description of the underlying error.
     case signingFailed(name: String, error: String)
+
+    /// The user dismissed the system passcode sheet.
+    ///
+    /// - Parameter name: The logical name of the key.
+    case userCancelled(name: String)
 }
 
 // MARK: - UserPresenceProtectedKey

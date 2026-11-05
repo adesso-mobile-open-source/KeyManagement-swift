@@ -105,7 +105,7 @@ The private key is protected by the device passcode. The system presents its own
 
 **Simulator support:** Yes, with limitations — the operation compiles and succeeds on the simulator, but no passcode check is performed and no system UI is shown. The credential is ignored by `SoftwareKeyStore` and the private-key operation always succeeds silently. Run integration tests on a real device to verify actual passcode authentication.
 
-**Note on cancellation:** `SignPasscodeError`, `DerivePasscodeError`, and `DecryptPasscodeError` have no `userCancelled` case. When the user dismisses the system passcode sheet, the Security framework returns an error that is mapped to `signingFailed` / `derivationFailed` / `decryptionFailed` rather than a dedicated cancellation case.
+**Note on cancellation:** `SignPasscodeError`, `DerivePasscodeError`, and `DecryptPasscodeError` each have a dedicated `userCancelled` case. When the user dismisses the system passcode sheet, the manager maps the underlying Security framework error to `userCancelled` instead of `signingFailed` / `derivationFailed` / `decryptionFailed`, so consumers can reliably distinguish cancellation from other failures.
 
 ```swift
 struct PasscodeKey: PasscodeProtectedKey {

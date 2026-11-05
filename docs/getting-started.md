@@ -14,7 +14,7 @@ Add the package dependency to `Package.swift`:
 ```swift
 dependencies: [
     .package(
-        url: "git@gitlab.adesso-group.com:ams/intern/ios/foundation-libs/keymanagement.git",
+        url: "https://github.com/adesso-mobile-open-source/KeyManagement-swift",
         from: "1.0.0"
     ),
 ],

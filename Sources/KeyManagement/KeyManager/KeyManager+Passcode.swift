@@ -52,7 +52,11 @@ extension KeyManagerImpl {
                 try autoCreate(named: key.name, trait: .passcode, protectionMode: key.protectionMode, password: nil)
             } catch { throw .keyCreationFailed(error: error.localizedDescription) }
         }
-        do { return try keyStore.sign(payload: payload, withKeyNamed: key.name, credential: .none) } catch {
+        do {
+            return try keyStore.sign(payload: payload, withKeyNamed: key.name, credential: .none)
+        } catch let caughtError where caughtError.isUserCancelled {
+            throw .userCancelled(name: key.name)
+        } catch {
             throw .signingFailed(name: key.name, error: error.localizedDescription)
         }
     }
@@ -71,7 +75,11 @@ extension KeyManagerImpl {
         }
         do {
             return try keyStore.deriveSharedSecret(withKeyNamed: key.name, publicKey: publicKey, credential: .none)
-        } catch { throw .derivationFailed(name: key.name, error: error.localizedDescription) }
+        } catch let caughtError where caughtError.isUserCancelled {
+            throw .userCancelled(name: key.name)
+        } catch {
+            throw .derivationFailed(name: key.name, error: error.localizedDescription)
+        }
     }
 
     @KeyManagementActor public func decrypt<K: PasscodeProtectedKey>(
@@ -89,6 +97,8 @@ extension KeyManagerImpl {
         }
         do {
             return try keyStore.decrypt(encodedData: encodedData, credential: .none, keyName: key.name)
+        } catch let caughtError where caughtError.isUserCancelled {
+            throw .userCancelled(name: key.name)
         } catch let caughtError where caughtError.isInvalidPayload {
             throw .invalidPayload
         } catch {

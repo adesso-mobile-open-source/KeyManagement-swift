@@ -54,6 +54,36 @@ import Testing
         }
     }
 
+    @Test("Sign maps userCancelled store error") func signMapsUserCancelled() throws {
+        let store = KeyStoreSpy()
+        store.hasKeyStub = true
+        store.signError = .userCancelled(name: "TestKey")
+        let mgr = makeManager(store: store)
+        #expect(throws: SignPasscodeError.userCancelled(name: "TestKey")) {
+            try mgr.sign(payload: Data(), with: TestKey())
+        }
+    }
+
+    @Test("DeriveSharedSecret maps userCancelled store error") func deriveMapsUserCancelled() throws {
+        let store = KeyStoreSpy()
+        store.hasKeyStub = true
+        store.deriveError = .userCancelled(name: "TestKey")
+        let mgr = makeManager(store: store)
+        #expect(throws: DerivePasscodeError.userCancelled(name: "TestKey")) {
+            try mgr.deriveSharedSecret(with: TestKey(), publicKey: Data())
+        }
+    }
+
+    @Test("Decrypt maps userCancelled store error") func decryptMapsUserCancelled() throws {
+        let store = KeyStoreSpy()
+        store.hasKeyStub = true
+        store.decryptError = .userCancelled(name: "TestKey")
+        let mgr = makeManager(store: store)
+        #expect(throws: DecryptPasscodeError.userCancelled(name: "TestKey")) {
+            try mgr.decrypt(encodedData: Data(repeating: 0, count: 82), with: TestKey())
+        }
+    }
+
     // MARK: - Factory
 
     private func makeManager(store: KeyStoreSpy, storedTrait: ProtectionTrait? = nil) -> KeyManagerImpl {

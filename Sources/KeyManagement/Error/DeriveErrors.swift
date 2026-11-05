@@ -102,11 +102,14 @@ public enum DerivePasscodeError: Error, Equatable {
     /// Auto-creation failed.
     /// - Parameter error: A human-readable description of the creation failure.
     case keyCreationFailed(error: String)
-    /// The ECDH key agreement failed.
+    /// The ECDH key agreement failed for a reason unrelated to user cancellation.
     /// - Parameters:
     ///   - name: The logical name of the key.
     ///   - error: A human-readable description of the underlying error.
     case derivationFailed(name: String, error: String)
+    /// The user dismissed the system passcode sheet.
+    /// - Parameter name: The logical name of the key.
+    case userCancelled(name: String)
 }
 
 // MARK: - UserPresenceProtectedKey

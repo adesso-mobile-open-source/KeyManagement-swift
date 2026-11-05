@@ -115,11 +115,14 @@ public enum DecryptPasscodeError: Error, Equatable {
     case keyCreationFailed(error: String)
     /// Payload too short. See ``DecryptPasswordError/invalidPayload``.
     case invalidPayload
-    /// Decryption failed.
+    /// Decryption failed for a reason unrelated to user cancellation.
     /// - Parameters:
     ///   - name: The logical name of the key.
     ///   - error: A human-readable description of the underlying error.
     case decryptionFailed(name: String, error: String)
+    /// The user dismissed the system passcode sheet.
+    /// - Parameter name: The logical name of the key.
+    case userCancelled(name: String)
 }
 
 // MARK: - UserPresenceProtectedKey
