@@ -1,0 +1,28 @@
+//
+//  KeyEnrollmentStateMonitorSpy.swift
+//  KeyManagement
+//
+//  Created by Feistel, Simon on 11.09.26 for adesso SE.
+//
+//  Copyright 2026 adesso SE
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//  http://www.apache.org/licenses/LICENSE-2.0
+
+@testable import KeyManagement
+
+final class KeyEnrollmentStateMonitorSpy: KeyEnrollmentStateMonitor, @unchecked Sendable {
+    var storeCallCount = 0
+    func storeEnrollmentState(forKeyNamed name: String) { storeCallCount += 1 }
+
+    var hasChangedStub = false
+    var hasChangedError: EnrollmentCheckError?
+    func hasEnrollmentChanged(forKeyNamed name: String) throws(EnrollmentCheckError) -> Bool {
+        if let error = hasChangedError { throw error }
+        return hasChangedStub
+    }
+
+    var clearCallCount = 0
+    func clearEnrollmentState(forKeyNamed name: String) { clearCallCount += 1 }
+}
