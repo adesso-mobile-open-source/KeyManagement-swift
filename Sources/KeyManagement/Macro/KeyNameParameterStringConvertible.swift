@@ -54,14 +54,14 @@ public protocol KeyNameParameterStringConvertible: Sendable {
     var stringRepresentation: String { get }
 }
 
-extension KeyNameParameterStringConvertible where Self: CustomStringConvertible {
+public extension KeyNameParameterStringConvertible where Self: CustomStringConvertible {
     /// Returns `description`, satisfying ``stringRepresentation`` for any
     /// `CustomStringConvertible` type.
-    public var stringRepresentation: String { description }
+    var stringRepresentation: String { description }
 }
 
-extension String: KeyNameParameterStringConvertible {}
-extension Int: KeyNameParameterStringConvertible {}
+extension String: KeyNameParameterStringConvertible { }
+extension Int: KeyNameParameterStringConvertible { }
 extension UUID: KeyNameParameterStringConvertible {
     /// Returns `uuidString` — the standard hyphenated upper-case UUID string.
     public var stringRepresentation: String { uuidString }

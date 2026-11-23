@@ -14,15 +14,15 @@
 
 final class KeyEnrollmentStateMonitorSpy: KeyEnrollmentStateMonitor, @unchecked Sendable {
     var storeCallCount = 0
-    func storeEnrollmentState(forKeyNamed name: String) { storeCallCount += 1 }
+    func storeEnrollmentState(forKeyNamed _: String) { storeCallCount += 1 }
 
     var hasChangedStub = false
     var hasChangedError: EnrollmentCheckError?
-    func hasEnrollmentChanged(forKeyNamed name: String) throws(EnrollmentCheckError) -> Bool {
+    func hasEnrollmentChanged(forKeyNamed _: String) throws(EnrollmentCheckError) -> Bool {
         if let error = hasChangedError { throw error }
         return hasChangedStub
     }
 
     var clearCallCount = 0
-    func clearEnrollmentState(forKeyNamed name: String) { clearCallCount += 1 }
+    func clearEnrollmentState(forKeyNamed _: String) { clearCallCount += 1 }
 }

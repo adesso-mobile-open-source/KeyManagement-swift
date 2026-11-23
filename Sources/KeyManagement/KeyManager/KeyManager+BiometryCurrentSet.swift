@@ -12,9 +12,8 @@
 
 import LocalAuthentication
 
-extension KeyManagerImpl {
-
-    @KeyManagementActor public func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+public extension KeyManagerImpl {
+    @KeyManagementActor func create(key: some BiometryCurrentSetProtectedKey) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryCurrentSet) {
             throw .configurationMismatch(name: key.name)
         }
@@ -31,7 +30,7 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func encrypt<K: BiometryCurrentSetProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some BiometryCurrentSetProtectedKey) throws(EncryptError) -> Data {
         if (try? keyStore.hasKey(named: key.name)) != true {
             do {
                 try autoCreate(
@@ -52,9 +51,9 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func sign<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor func sign(
         payload: Data,
-        with key: K,
+        with key: some BiometryCurrentSetProtectedKey,
         laContext: LAContext? = nil
     ) throws(SignBiometryCurrentSetError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryCurrentSet) {
@@ -77,8 +76,8 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some BiometryCurrentSetProtectedKey,
         publicKey: Data,
         laContext: LAContext? = nil
     ) throws(DeriveBiometryCurrentSetError) -> Data {
@@ -106,12 +105,13 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func decrypt<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor func decrypt(
         encodedData: Data,
-        with key: K,
+        with key: some BiometryCurrentSetProtectedKey,
         laContext: LAContext? = nil
     ) throws(DecryptBiometryCurrentSetError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .biometryCurrentSet) {
             throw .configurationMismatch(name: key.name)
         }
@@ -136,8 +136,8 @@ extension KeyManagerImpl {
 
     /// Auto-creates the key if missing and verifies the biometric enrollment
     /// baseline has not changed, mapping any failure to the operation's error type.
-    @KeyManagementActor private func ensureKeyAndEnrollment<K: BiometryCurrentSetProtectedKey, E: Error>(
-        for key: K,
+    @KeyManagementActor private func ensureKeyAndEnrollment<E: Error>(
+        for key: some BiometryCurrentSetProtectedKey,
         keyCreationFailed: (String) -> E,
         enrollmentChanged: (String) -> E,
         operationFailed: (String, String) -> E

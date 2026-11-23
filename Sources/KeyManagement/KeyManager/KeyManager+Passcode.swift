@@ -12,9 +12,8 @@
 
 import Foundation
 
-extension KeyManagerImpl {
-
-    @KeyManagementActor public func create<K: PasscodeProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+public extension KeyManagerImpl {
+    @KeyManagementActor func create(key: some PasscodeProtectedKey) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
         }
@@ -25,7 +24,7 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func encrypt<K: PasscodeProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some PasscodeProtectedKey) throws(EncryptError) -> Data {
         if (try? keyStore.hasKey(named: key.name)) != true {
             do {
                 try autoCreate(named: key.name, trait: .passcode, protectionMode: key.protectionMode, password: nil)
@@ -40,9 +39,9 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func sign<K: PasscodeProtectedKey>(
+    @KeyManagementActor func sign(
         payload: Data,
-        with key: K
+        with key: some PasscodeProtectedKey
     ) throws(SignPasscodeError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
@@ -61,8 +60,8 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func deriveSharedSecret<K: PasscodeProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some PasscodeProtectedKey,
         publicKey: Data
     ) throws(DerivePasscodeError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
@@ -82,11 +81,12 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func decrypt<K: PasscodeProtectedKey>(
+    @KeyManagementActor func decrypt(
         encodedData: Data,
-        with key: K
+        with key: some PasscodeProtectedKey
     ) throws(DecryptPasscodeError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .passcode) {
             throw .configurationMismatch(name: key.name)
         }

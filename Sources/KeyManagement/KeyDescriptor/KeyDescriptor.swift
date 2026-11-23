@@ -57,7 +57,6 @@ import Foundation
 /// keychain item. Two descriptors with the same name but **different** traits will
 /// cause ``KeyManager`` to throw a `configurationMismatch` error.
 public protocol KeyDescriptor: Sendable {
-
     /// The unique identifier for this key within the keystore.
     ///
     /// The name is combined with the `applicationTag` supplied to
@@ -86,7 +85,7 @@ public protocol KeyDescriptor: Sendable {
     var protectionMode: ProtectionMode { get }
 }
 
-extension KeyDescriptor {
+public extension KeyDescriptor {
     /// Returns the unqualified Swift type name of the conforming type.
     ///
     /// For example, a struct named `MySigningKey` returns `"MySigningKey"`.
@@ -100,12 +99,12 @@ extension KeyDescriptor {
     /// >     let name = "com.example.app.signing" // stable, independent of type name
     /// > }
     /// > ```
-    public var name: String { String(describing: Self.self) }
+    var name: String { String(describing: Self.self) }
 
     /// Returns ``ProtectionMode/whenUnlockedThisDeviceOnly``.
     ///
     /// This default prevents the key from migrating to other devices and requires
     /// the device to be unlocked before the key can be accessed. Override when
     /// your use case requires different accessibility semantics.
-    public var protectionMode: ProtectionMode { .whenUnlockedThisDeviceOnly }
+    var protectionMode: ProtectionMode { .whenUnlockedThisDeviceOnly }
 }

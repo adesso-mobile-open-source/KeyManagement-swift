@@ -12,9 +12,8 @@
 
 import Foundation
 
-extension KeyManagerImpl {
-
-    public func sign<K: PasswordProtectedKey>(payload: Data, with key: K, password: Data) throws(SignPasswordError)
+public extension KeyManagerImpl {
+    func sign(payload: Data, with key: some PasswordProtectedKey, password: Data) throws(SignPasswordError)
         -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .password) {
             throw .configurationMismatch(name: key.name)
@@ -38,7 +37,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func deriveSharedSecret<K: PasswordProtectedKey>(with key: K, publicKey: Data, password: Data)
+    func deriveSharedSecret(with key: some PasswordProtectedKey, publicKey: Data, password: Data)
         throws(DerivePasswordError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .password) {
             throw .configurationMismatch(name: key.name)
@@ -66,10 +65,11 @@ extension KeyManagerImpl {
         }
     }
 
-    public func encrypt<K: PasswordProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some PasswordProtectedKey) throws(EncryptError) -> Data {
         guard (try? keyStore.hasKey(named: key.name)) == true else {
             throw .keyNotFound(name: key.name)
         }
+
         do {
             return try keyStore.encrypt(data: data, keyName: key.name)
         } catch {
@@ -77,7 +77,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func encrypt<K: PasswordProtectedKey>(data: Data, with key: K, generateKeyWithPassword password: Data)
+    func encrypt(data: Data, with key: some PasswordProtectedKey, generateKeyWithPassword password: Data)
         throws(EncryptError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .password) {
             throw .keyCreationFailed(error: "Configuration mismatch for key '\(key.name)'")
@@ -97,7 +97,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func create<K: PasswordProtectedKey>(key: K, password: Data) throws(CreateKeyError) -> Data {
+    func create(key: some PasswordProtectedKey, password: Data) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .password) {
             throw .configurationMismatch(name: key.name)
         }
@@ -108,9 +108,10 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func decrypt<K: PasswordProtectedKey>(encodedData: Data, with key: K, password: Data)
+    func decrypt(encodedData: Data, with key: some PasswordProtectedKey, password: Data)
         throws(DecryptPasswordError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .password) {
             throw .configurationMismatch(name: key.name)
         }

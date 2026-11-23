@@ -265,7 +265,7 @@ import Spyable
 /// auto-generated `SecurityProxySpy` (available in DEBUG builds) instead.
 public struct SecurityProxyImpl: SecurityProxy {
     /// Creates a new `SecurityProxyImpl` instance.
-    public init() {}
+    public init() { }
 
     public func secAccessControlCreateWithFlags(
         _ allocator: CFAllocator?,

@@ -20,8 +20,8 @@ import Foundation
 /// > Warning: Implementations must be considered insecure for production use.
 protocol CanInjectKey {
     /// Injects a DER-encoded P-256 private key for a `PasswordProtectedKey`.
-    func injectKey<K: PasswordProtectedKey>(_ key: K, password: Data, privateKeyDER: Data) async throws
+    func injectKey(_ key: some PasswordProtectedKey, password: Data, privateKeyDER: Data) async throws
 
     /// Injects a DER-encoded P-256 private key for an `UnprotectedKey`.
-    func injectKey<K: UnprotectedKey>(_ key: K, privateKeyDER: Data) async throws
+    func injectKey(_ key: some UnprotectedKey, privateKeyDER: Data) async throws
 }

@@ -12,9 +12,8 @@
 
 import LocalAuthentication
 
-extension KeyManagerImpl {
-
-    @KeyManagementActor public func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+public extension KeyManagerImpl {
+    @KeyManagementActor func create(key: some BiometryAnyProtectedKey) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryAny) {
             throw .configurationMismatch(name: key.name)
         }
@@ -25,9 +24,9 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    @KeyManagementActor public func sign<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor func sign(
         payload: Data,
-        with key: K,
+        with key: some BiometryAnyProtectedKey,
         laContext: LAContext? = nil
     ) throws(SignBiometryAnyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .biometryAny) {
@@ -49,8 +48,8 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func deriveSharedSecret<K: BiometryAnyProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some BiometryAnyProtectedKey,
         publicKey: Data,
         laContext: LAContext? = nil
     ) throws(DeriveBiometryAnyError) -> Data {
@@ -77,7 +76,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func encrypt<K: BiometryAnyProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some BiometryAnyProtectedKey) throws(EncryptError) -> Data {
         if (try? keyStore.hasKey(named: key.name)) != true {
             do {
                 try autoCreate(named: key.name, trait: .biometryAny, protectionMode: key.protectionMode, password: nil)
@@ -92,12 +91,13 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func decrypt<K: BiometryAnyProtectedKey>(
+    @KeyManagementActor func decrypt(
         encodedData: Data,
-        with key: K,
+        with key: some BiometryAnyProtectedKey,
         laContext: LAContext? = nil
     ) throws(DecryptBiometryAnyError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .biometryAny) {
             throw .configurationMismatch(name: key.name)
         }

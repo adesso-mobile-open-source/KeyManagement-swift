@@ -18,7 +18,7 @@ import LocalAuthentication
 /// The authentication material for a private-key operation.
 enum KeyCredential: Sendable {
     case password(Data)
-    case laContext(LAContext?)  // nil = store creates its own context
+    case laContext(LAContext?) // nil = store creates its own context
     case none
 }
 
@@ -63,24 +63,28 @@ enum KeyStoreError: Error, Equatable {
 extension KeyStoreError {
     var isInvalidPassword: Bool {
         switch self {
-        case .cannotSignDataInvalidPassword, .invalidPassword: return true
-        default: return false
+        case .cannotSignDataInvalidPassword, .invalidPassword: true
+        default: false
         }
     }
+
     var isInvalidPayload: Bool {
         if case .invalidPayload = self { return true }
         return false
     }
+
     var isUserCancelled: Bool {
         if case .userCancelled = self { return true }
         return false
     }
+
     var isBiometryLockout: Bool {
         if case .biometryLockout = self { return true }
         return false
     }
+
     var osstatus: OSStatus? {
-        if case .cannotRemoveKey(let status) = self { return status }
+        if case let .cannotRemoveKey(status) = self { return status }
         return nil
     }
 }

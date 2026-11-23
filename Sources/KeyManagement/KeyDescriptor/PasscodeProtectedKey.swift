@@ -45,7 +45,7 @@
 /// // KeyManagementActor, so it must be awaited.
 /// let sig = try await manager.sign(payload: data, with: PasscodeKey())
 /// ```
-public protocol PasscodeProtectedKey: KeyDescriptor {}
+public protocol PasscodeProtectedKey: KeyDescriptor { }
 
 extension PasscodeProtectedKey {
     static var protectionTrait: ProtectionTrait {

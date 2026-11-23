@@ -52,7 +52,7 @@
 ///
 /// let sig = try await manager.sign(payload: data, with: PresenceKey(), laContext: nil)
 /// ```
-public protocol UserPresenceProtectedKey: KeyDescriptor {}
+public protocol UserPresenceProtectedKey: KeyDescriptor { }
 
 extension UserPresenceProtectedKey {
     static var protectionTrait: ProtectionTrait {

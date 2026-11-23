@@ -31,4 +31,4 @@ import Spyable
     @discardableResult func canEvaluatePolicy(_ policy: LAPolicy, error: NSErrorPointer) -> Bool
 }
 
-extension LAContext: PolicyDomainStateEvaluationContext {}
+extension LAContext: PolicyDomainStateEvaluationContext { }

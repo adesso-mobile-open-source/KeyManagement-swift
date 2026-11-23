@@ -41,6 +41,7 @@ final class PersistentKeyValueStoreSpy: PersistentKeyValueStore, @unchecked Send
     func get<V: Decodable>(valueFor key: PersistentKey) throws -> V? {
         getValueCalls.append(key.stringValue)
         guard let data = store[key.stringValue] else { return nil }
+
         return try decoder.decode(V.self, from: data)
     }
 

@@ -35,7 +35,7 @@
 /// let password = Data("s3cr3t".utf8)
 /// let sig = try manager.sign(payload: data, with: AppSigningKey(), password: password)
 /// ```
-public protocol PasswordProtectedKey: KeyDescriptor {}
+public protocol PasswordProtectedKey: KeyDescriptor { }
 
 extension PasswordProtectedKey {
     static var protectionTrait: ProtectionTrait {

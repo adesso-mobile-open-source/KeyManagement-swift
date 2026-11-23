@@ -25,7 +25,6 @@ import Testing
 @Suite("BiometryAnyProtectedKey — Integration")
 @KeyManagementActor
 struct BiometryAnyProtectedKeyIntegrationTests {
-
     struct BiometrySigningKey: BiometryAnyProtectedKey { let name = "integration.biometryAny.signing" }
     struct BiometryDeriveKey: BiometryAnyProtectedKey { let name = "integration.biometryAny.derive" }
     struct BiometryDecryptKey: BiometryAnyProtectedKey { let name = "integration.biometryAny.decrypt" }
@@ -46,8 +45,8 @@ struct BiometryAnyProtectedKeyIntegrationTests {
 
     // MARK: - sign roundtrip
 
-    @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() async throws {
+    @Test
+    func `sign produces a verifiable ECDSA signature`() async throws {
         defer { try? manager.removeKey(BiometrySigningKey()) }
         let payload = Data("Integration test payload".utf8)
         let ctx = try await evaluatedContext(reason: "Sign — BiometryAny integration test")
@@ -57,8 +56,8 @@ struct BiometryAnyProtectedKeyIntegrationTests {
         #expect(publicKey.isValidSignature(ecdsaSignature, for: payload))
     }
 
-    @Test("Repeated sign calls reuse the same key")
-    func sign_secondCallReusesKey() async throws {
+    @Test
+    func `Repeated sign calls reuse the same key`() async throws {
         defer { try? manager.removeKey(BiometrySigningKey()) }
         let payload = Data("hello".utf8)
         let ctx1 = try await evaluatedContext(reason: "First sign — BiometryAny")
@@ -72,8 +71,8 @@ struct BiometryAnyProtectedKeyIntegrationTests {
 
     // MARK: - encrypt / decrypt roundtrip
 
-    @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() async throws {
+    @Test
+    func `encrypt then decrypt recovers original plaintext`() async throws {
         defer { try? manager.removeKey(BiometryDecryptKey()) }
         let plaintext = Data("Biometry-protected secret 🔑".utf8)
         let ctx1 = try await evaluatedContext(reason: "Create key — BiometryAny")
@@ -84,8 +83,8 @@ struct BiometryAnyProtectedKeyIntegrationTests {
         #expect(recovered == plaintext)
     }
 
-    @Test("decrypt with short payload throws invalidPayload without prompting")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    @Test
+    func `decrypt with short payload throws invalidPayload without prompting`() throws {
         defer { try? manager.removeKey(BiometryDecryptKey()) }
         #expect(throws: DecryptBiometryAnyError.invalidPayload) {
             try manager.decrypt(encodedData: Data(repeating: 0, count: 81), with: BiometryDecryptKey(), laContext: nil)
@@ -94,8 +93,8 @@ struct BiometryAnyProtectedKeyIntegrationTests {
 
     // MARK: - deriveSharedSecret roundtrip
 
-    @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() async throws {
+    @Test
+    func `deriveSharedSecret matches the ephemeral-side computation`() async throws {
         defer { try? manager.removeKey(BiometryDeriveKey()) }
         let ctx1 = try await evaluatedContext(reason: "Create key — BiometryAny")
         _ = try manager.sign(payload: Data("x".utf8), with: BiometryDeriveKey(), laContext: ctx1)

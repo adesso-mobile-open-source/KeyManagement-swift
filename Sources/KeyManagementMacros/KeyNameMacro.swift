@@ -12,21 +12,22 @@
 
 import Foundation
 import SwiftSyntax
-import SwiftSyntaxMacros
 import SwiftSyntaxMacroExpansion
+import SwiftSyntaxMacros
 
 public struct KeyNameMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
-        providingMembersOf declaration: some DeclGroupSyntax,
-        conformingTo protocols: [TypeSyntax],
-        in context: some MacroExpansionContext
+        providingMembersOf _: some DeclGroupSyntax,
+        conformingTo _: [TypeSyntax],
+        in _: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         // 1. Extract template string argument.
-        guard case .argumentList(let args) = node.arguments, let first = args.first,
-            let lit = first.expression.as(StringLiteralExprSyntax.self),
-            case .stringSegment(let seg) = lit.segments.first
+        guard case let .argumentList(args) = node.arguments, let first = args.first,
+              let lit = first.expression.as(StringLiteralExprSyntax.self),
+              case let .stringSegment(seg) = lit.segments.first
         else { throw MacroExpansionErrorMessage("@KeyName requires a string literal argument.") }
+
         let template = seg.content.text
 
         // 2. Validate non-empty.
@@ -75,7 +76,8 @@ public struct KeyNameMacro: MemberMacro {
         while let open = remaining.firstIndex(of: "{") {
             let after = remaining.index(after: open)
             guard let close = remaining[after...].firstIndex(of: "}") else { break }
-            result.append(String(remaining[after..<close]))
+
+            result.append(String(remaining[after ..< close]))
             remaining = remaining[remaining.index(after: close)...]
         }
         return result
@@ -83,9 +85,11 @@ public struct KeyNameMacro: MemberMacro {
 
     static func isValidIdentifier(_ identifier: String) -> Bool {
         guard !identifier.isEmpty else { return false }
+
         let head = CharacterSet.letters.union(.init(charactersIn: "_"))
         let tail = CharacterSet.alphanumerics.union(.init(charactersIn: "_"))
         guard let firstScalar = identifier.unicodeScalars.first, head.contains(firstScalar) else { return false }
+
         return identifier.unicodeScalars.dropFirst().allSatisfy { tail.contains($0) }
     }
 }

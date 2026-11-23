@@ -12,9 +12,8 @@
 
 import Foundation
 
-extension KeyManagerImpl {
-
-    public func create<K: UnprotectedKey>(key: K) throws(CreateKeyError) -> Data {
+public extension KeyManagerImpl {
+    func create(key: some UnprotectedKey) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .unprotected) {
             throw .configurationMismatch(name: key.name)
         }
@@ -25,7 +24,7 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func encrypt<K: UnprotectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some UnprotectedKey) throws(EncryptError) -> Data {
         if (try? keyStore.hasKey(named: key.name)) != true {
             do {
                 try autoCreate(named: key.name, trait: .unprotected, protectionMode: key.protectionMode, password: nil)
@@ -40,7 +39,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func sign<K: UnprotectedKey>(payload: Data, with key: K) throws(SignUnprotectedError) -> Data {
+    func sign(payload: Data, with key: some UnprotectedKey) throws(SignUnprotectedError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .unprotected) {
             throw .configurationMismatch(name: key.name)
         }
@@ -54,7 +53,7 @@ extension KeyManagerImpl {
         }
     }
 
-    public func deriveSharedSecret<K: UnprotectedKey>(with key: K, publicKey: Data) throws(DeriveUnprotectedError)
+    func deriveSharedSecret(with key: some UnprotectedKey, publicKey: Data) throws(DeriveUnprotectedError)
         -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .unprotected) {
             throw .configurationMismatch(name: key.name)
@@ -69,8 +68,9 @@ extension KeyManagerImpl {
         } catch { throw .derivationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func decrypt<K: UnprotectedKey>(encodedData: Data, with key: K) throws(DecryptUnprotectedError) -> Data {
+    func decrypt(encodedData: Data, with key: some UnprotectedKey) throws(DecryptUnprotectedError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .unprotected) {
             throw .configurationMismatch(name: key.name)
         }

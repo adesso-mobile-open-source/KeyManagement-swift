@@ -10,19 +10,18 @@
 //  You may obtain a copy of the License at
 //  http://www.apache.org/licenses/LICENSE-2.0
 
+@testable import KeyManagement
 import PersistentStorage
+
 //
 //  KeyManagement
 //
 import Testing
 
-@testable import KeyManagement
-
 @Suite("KeyManager — UnprotectedKey") struct KeyManagerUnprotectedTests {
-
     struct TestKey: UnprotectedKey { let name = "TestKey" }
 
-    @Test("Auto-creates key on first sign when absent") func autoCreatesOnFirstSign() throws {
+    @Test func `Auto-creates key on first sign when absent`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         let mgr = makeManager(store: store)
@@ -30,7 +29,7 @@ import Testing
         #expect(store.createCallCount == 1)
     }
 
-    @Test("Does not re-create when key already exists") func doesNotRecreate() throws {
+    @Test func `Does not re-create when key already exists`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store)
@@ -38,7 +37,7 @@ import Testing
         #expect(store.createCallCount == 0)
     }
 
-    @Test("Throws configurationMismatch when trait differs") func throwsConfigMismatch() throws {
+    @Test func `Throws configurationMismatch when trait differs`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store, storedTrait: .password)
@@ -47,7 +46,7 @@ import Testing
         }
     }
 
-    @Test("Decrypt rejects short payload") func decryptRejectsShortPayload() throws {
+    @Test func `Decrypt rejects short payload`() throws {
         let mgr = makeManager(store: KeyStoreSpy())
         #expect(throws: DecryptUnprotectedError.invalidPayload) {
             try mgr.decrypt(encodedData: Data(repeating: 0, count: 81), with: TestKey())
