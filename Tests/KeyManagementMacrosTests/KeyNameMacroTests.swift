@@ -11,14 +11,12 @@
 //  http://www.apache.org/licenses/LICENSE-2.0
 
 #if os(macOS)
+@testable import KeyManagementMacros
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest
 
-@testable import KeyManagementMacros
-
 final class KeyNameMacroTests: XCTestCase {
-
     let macros: [String: any Macro.Type] = ["KeyName": KeyNameMacro.self]
 
     func testSinglePlaceholder() {
@@ -28,14 +26,14 @@ final class KeyNameMacroTests: XCTestCase {
             struct UserKey: PasswordProtectedKey {}
             """,
             expandedSource: """
-                struct UserKey: PasswordProtectedKey {
+            struct UserKey: PasswordProtectedKey {
 
-                    public let userId: any KeyNameParameterStringConvertible
+                public let userId: any KeyNameParameterStringConvertible
 
-                    public var name: String {
-                        "user/\\(userId.stringRepresentation)/signing"
-                    }}
-                """,
+                public var name: String {
+                    "user/\\(userId.stringRepresentation)/signing"
+                }}
+            """,
             macros: macros
         )
     }
@@ -47,12 +45,12 @@ final class KeyNameMacroTests: XCTestCase {
             struct StaticKey: UnprotectedKey {}
             """,
             expandedSource: """
-                struct StaticKey: UnprotectedKey {
+            struct StaticKey: UnprotectedKey {
 
-                    public var name: String {
-                        "static/key"
-                    }}
-                """,
+                public var name: String {
+                    "static/key"
+                }}
+            """,
             macros: macros
         )
     }
@@ -64,16 +62,16 @@ final class KeyNameMacroTests: XCTestCase {
             struct OrgKey: BiometryAnyProtectedKey {}
             """,
             expandedSource: """
-                struct OrgKey: BiometryAnyProtectedKey {
+            struct OrgKey: BiometryAnyProtectedKey {
 
-                    public let org: any KeyNameParameterStringConvertible
+                public let org: any KeyNameParameterStringConvertible
 
-                    public let user: any KeyNameParameterStringConvertible
+                public let user: any KeyNameParameterStringConvertible
 
-                    public var name: String {
-                        "\\(org.stringRepresentation)/\\(user.stringRepresentation)"
-                    }}
-                """,
+                public var name: String {
+                    "\\(org.stringRepresentation)/\\(user.stringRepresentation)"
+                }}
+            """,
             macros: macros
         )
     }

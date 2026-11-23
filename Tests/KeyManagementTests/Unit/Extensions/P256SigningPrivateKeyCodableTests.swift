@@ -15,7 +15,6 @@
 //
 
 import CryptoKit
-
 @testable import KeyManagement
 
 struct P256SigningPrivateKeyCodableTests {

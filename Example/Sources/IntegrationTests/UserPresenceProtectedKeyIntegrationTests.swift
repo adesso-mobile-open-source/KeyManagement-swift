@@ -25,7 +25,6 @@ import Testing
 @Suite("UserPresenceProtectedKey — Integration")
 @KeyManagementActor
 struct UserPresenceProtectedKeyIntegrationTests {
-
     struct UserPresenceSigningKey: UserPresenceProtectedKey { let name = "integration.userPresence.signing" }
     struct UserPresenceDecryptKey: UserPresenceProtectedKey { let name = "integration.userPresence.decrypt" }
     struct UserPresenceDeriveKey: UserPresenceProtectedKey { let name = "integration.userPresence.derive" }
@@ -46,8 +45,8 @@ struct UserPresenceProtectedKeyIntegrationTests {
 
     // MARK: - sign roundtrip
 
-    @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() async throws {
+    @Test
+    func `sign produces a verifiable ECDSA signature`() async throws {
         defer { try? manager.removeKey(UserPresenceSigningKey()) }
         let payload = Data("UserPresence integration payload".utf8)
         let ctx = try await evaluatedContext(reason: "Sign — UserPresence integration test")
@@ -59,8 +58,8 @@ struct UserPresenceProtectedKeyIntegrationTests {
 
     // MARK: - encrypt / decrypt roundtrip
 
-    @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() async throws {
+    @Test
+    func `encrypt then decrypt recovers original plaintext`() async throws {
         defer { try? manager.removeKey(UserPresenceDecryptKey()) }
         let plaintext = Data("UserPresence secret 🔑".utf8)
         let ctx1 = try await evaluatedContext(reason: "Create key — UserPresence")
@@ -71,8 +70,8 @@ struct UserPresenceProtectedKeyIntegrationTests {
         #expect(recovered == plaintext)
     }
 
-    @Test("decrypt with short payload throws invalidPayload without prompting")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    @Test
+    func `decrypt with short payload throws invalidPayload without prompting`() throws {
         defer { try? manager.removeKey(UserPresenceDecryptKey()) }
         #expect(throws: DecryptUserPresenceError.invalidPayload) {
             try manager.decrypt(
@@ -85,8 +84,8 @@ struct UserPresenceProtectedKeyIntegrationTests {
 
     // MARK: - deriveSharedSecret roundtrip
 
-    @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() async throws {
+    @Test
+    func `deriveSharedSecret matches the ephemeral-side computation`() async throws {
         defer { try? manager.removeKey(UserPresenceDeriveKey()) }
         let ctx1 = try await evaluatedContext(reason: "Create key — UserPresence derive")
         _ = try manager.sign(payload: Data("x".utf8), with: UserPresenceDeriveKey(), laContext: ctx1)

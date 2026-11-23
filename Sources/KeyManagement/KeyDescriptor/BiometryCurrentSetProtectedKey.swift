@@ -57,7 +57,7 @@
 /// this value may always be `nil`, causing ``KeyManager/hasBiometricEnrollmentChanged(for:)``
 /// to always return `true`. Run integration tests on a real device for
 /// meaningful enrollment-change detection.
-public protocol BiometryCurrentSetProtectedKey: KeyDescriptor {}
+public protocol BiometryCurrentSetProtectedKey: KeyDescriptor { }
 
 extension BiometryCurrentSetProtectedKey {
     static var protectionTrait: ProtectionTrait {

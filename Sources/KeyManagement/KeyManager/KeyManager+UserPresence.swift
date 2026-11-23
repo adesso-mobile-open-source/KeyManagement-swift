@@ -12,9 +12,8 @@
 
 import LocalAuthentication
 
-extension KeyManagerImpl {
-
-    @KeyManagementActor public func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data {
+public extension KeyManagerImpl {
+    @KeyManagementActor func create(key: some UserPresenceProtectedKey) throws(CreateKeyError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .userPresence) {
             throw .configurationMismatch(name: key.name)
         }
@@ -25,7 +24,7 @@ extension KeyManagerImpl {
         } catch { throw .creationFailed(name: key.name, error: error.localizedDescription) }
     }
 
-    public func encrypt<K: UserPresenceProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data {
+    func encrypt(data: Data, with key: some UserPresenceProtectedKey) throws(EncryptError) -> Data {
         if (try? keyStore.hasKey(named: key.name)) != true {
             do {
                 try autoCreate(named: key.name, trait: .userPresence, protectionMode: key.protectionMode, password: nil)
@@ -40,9 +39,9 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func sign<K: UserPresenceProtectedKey>(
+    @KeyManagementActor func sign(
         payload: Data,
-        with key: K,
+        with key: some UserPresenceProtectedKey,
         laContext: LAContext? = nil
     ) throws(SignUserPresenceError) -> Data {
         if case .mismatch = validateConfiguration(for: key, trait: .userPresence) {
@@ -64,8 +63,8 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func deriveSharedSecret<K: UserPresenceProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some UserPresenceProtectedKey,
         publicKey: Data,
         laContext: LAContext? = nil
     ) throws(DeriveUserPresenceError) -> Data {
@@ -92,12 +91,13 @@ extension KeyManagerImpl {
         }
     }
 
-    @KeyManagementActor public func decrypt<K: UserPresenceProtectedKey>(
+    @KeyManagementActor func decrypt(
         encodedData: Data,
-        with key: K,
+        with key: some UserPresenceProtectedKey,
         laContext: LAContext? = nil
     ) throws(DecryptUserPresenceError) -> Data {
         guard encodedData.count > 81 else { throw .invalidPayload }
+
         if case .mismatch = validateConfiguration(for: key, trait: .userPresence) {
             throw .configurationMismatch(name: key.name)
         }

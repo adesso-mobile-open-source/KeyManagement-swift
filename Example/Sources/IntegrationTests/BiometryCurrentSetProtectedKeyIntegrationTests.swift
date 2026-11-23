@@ -25,7 +25,6 @@ import Testing
 @Suite("BiometryCurrentSetProtectedKey — Integration")
 @KeyManagementActor
 struct BiometryCurrentSetKeyIntegrationTests {
-
     struct CurrentSetSigningKey: BiometryCurrentSetProtectedKey { let name = "integration.biometryCurrentSet.signing" }
     struct CurrentSetDecryptKey: BiometryCurrentSetProtectedKey { let name = "integration.biometryCurrentSet.decrypt" }
     struct CurrentSetDeriveKey: BiometryCurrentSetProtectedKey { let name = "integration.biometryCurrentSet.derive" }
@@ -46,21 +45,21 @@ struct BiometryCurrentSetKeyIntegrationTests {
 
     // MARK: - Enrollment change detection (prompt-free)
 
-    @Test("hasBiometricEnrollmentChanged returns true before any create (no baseline)")
-    func enrollmentChanged_trueWithNoBaseline() throws {
+    @Test
+    func `hasBiometricEnrollmentChanged returns true before any create (no baseline)`() throws {
         #expect(try manager.hasBiometricEnrollmentChanged(for: CurrentSetSigningKey()) == true)
     }
 
-    @Test("hasBiometricEnrollmentChanged returns false immediately after auto-create")
-    func enrollmentChanged_falseAfterAutoCreate() async throws {
+    @Test
+    func `hasBiometricEnrollmentChanged returns false immediately after auto-create`() async throws {
         defer { try? manager.removeKey(CurrentSetSigningKey()) }
         let ctx = try await evaluatedContext(reason: "Create key — BiometryCurrentSet enrollment check")
         _ = try manager.sign(payload: Data("x".utf8), with: CurrentSetSigningKey(), laContext: ctx)
         #expect(try manager.hasBiometricEnrollmentChanged(for: CurrentSetSigningKey()) == false)
     }
 
-    @Test("hasBiometricEnrollmentChanged returns true after removeKey clears baseline")
-    func enrollmentChanged_trueAfterRemoveKey() async throws {
+    @Test
+    func `hasBiometricEnrollmentChanged returns true after removeKey clears baseline`() async throws {
         let ctx = try await evaluatedContext(reason: "Create key — BiometryCurrentSet remove baseline")
         _ = try manager.sign(payload: Data("x".utf8), with: CurrentSetSigningKey(), laContext: ctx)
         try manager.removeKey(CurrentSetSigningKey())
@@ -69,8 +68,8 @@ struct BiometryCurrentSetKeyIntegrationTests {
 
     // MARK: - sign roundtrip
 
-    @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() async throws {
+    @Test
+    func `sign produces a verifiable ECDSA signature`() async throws {
         defer { try? manager.removeKey(CurrentSetSigningKey()) }
         let payload = Data("CurrentSet integration payload".utf8)
         let ctx = try await evaluatedContext(reason: "Sign — BiometryCurrentSet")
@@ -82,8 +81,8 @@ struct BiometryCurrentSetKeyIntegrationTests {
 
     // MARK: - encrypt / decrypt roundtrip
 
-    @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() async throws {
+    @Test
+    func `encrypt then decrypt recovers original plaintext`() async throws {
         defer { try? manager.removeKey(CurrentSetDecryptKey()) }
         let plaintext = Data("CurrentSet secret 🔐".utf8)
         let ctx1 = try await evaluatedContext(reason: "Create key — BiometryCurrentSet")
@@ -94,8 +93,8 @@ struct BiometryCurrentSetKeyIntegrationTests {
         #expect(recovered == plaintext)
     }
 
-    @Test("decrypt with short payload throws invalidPayload without prompting")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    @Test
+    func `decrypt with short payload throws invalidPayload without prompting`() throws {
         defer { try? manager.removeKey(CurrentSetDecryptKey()) }
         #expect(throws: DecryptBiometryCurrentSetError.invalidPayload) {
             try manager.decrypt(
@@ -108,8 +107,8 @@ struct BiometryCurrentSetKeyIntegrationTests {
 
     // MARK: - deriveSharedSecret roundtrip
 
-    @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() async throws {
+    @Test
+    func `deriveSharedSecret matches the ephemeral-side computation`() async throws {
         defer { try? manager.removeKey(CurrentSetDeriveKey()) }
         let ctx1 = try await evaluatedContext(reason: "Create key — BiometryCurrentSet derive")
         _ = try manager.sign(payload: Data("x".utf8), with: CurrentSetDeriveKey(), laContext: ctx1)

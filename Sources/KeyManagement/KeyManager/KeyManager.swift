@@ -45,12 +45,12 @@ import LocalAuthentication
 /// key and throws ``CreateKeyError/keyAlreadyExists(name:)`` if the key is
 /// already present.
 ///
-    /// ## Read-only operations do not auto-create
-    ///
-    /// `hasKey` and `getPublicKey` never create a key. `encrypt` auto-creates for
-    /// all traits except `PasswordProtectedKey` — use
-    /// ``encrypt(data:with:generateKeyWithPassword:)`` to auto-create a
-    /// password-protected key on first call.
+/// ## Read-only operations do not auto-create
+///
+/// `hasKey` and `getPublicKey` never create a key. `encrypt` auto-creates for
+/// all traits except `PasswordProtectedKey` — use
+/// ``encrypt(data:with:generateKeyWithPassword:)`` to auto-create a
+/// password-protected key on first call.
 ///
 /// ## Configuration mismatch
 ///
@@ -59,7 +59,6 @@ import LocalAuthentication
 /// the manager throws `configurationMismatch`. Remove the existing key and
 /// let the auto-create path recreate it with the new trait.
 public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedOperations, Sendable {
-
     // MARK: - Read-only (trait-agnostic)
 
     /// Returns whether a key with the given descriptor exists in the keystore.
@@ -71,7 +70,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Returns: `true` if the key exists; `false` if it does not.
     /// - Throws: ``HasKeyError/lookupFailed(name:error:)`` if the keychain
     ///   query itself fails unexpectedly.
-    func hasKey<K: KeyDescriptor>(_ key: K) throws(HasKeyError) -> Bool
+    func hasKey(_ key: some KeyDescriptor) throws(HasKeyError) -> Bool
 
     /// Returns the DER-encoded P-256 public key for the given key descriptor.
     ///
@@ -86,7 +85,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A key descriptor identifying the key to retrieve.
     /// - Returns: DER-encoded P-256 public key data.
     /// - Throws: ``GetPublicKeyError``
-    func getPublicKey<K: KeyDescriptor>(_ key: K) throws(GetPublicKeyError) -> Data
+    func getPublicKey(_ key: some KeyDescriptor) throws(GetPublicKeyError) -> Data
 
     // MARK: - removeKey
 
@@ -101,7 +100,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to remove.
     /// - Throws: ``RemoveKeyError/removalFailed(name:status:)`` if the keychain
     ///   delete operation fails.
-    func removeKey<K: KeyDescriptor>(_ key: K) throws(RemoveKeyError)
+    func removeKey(_ key: some KeyDescriptor) throws(RemoveKeyError)
 
     /// Removes a ``BiometryCurrentSetProtectedKey`` key and clears its biometric
     /// enrollment baseline.
@@ -112,7 +111,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the current-set key to remove.
     /// - Throws: ``RemoveKeyError/removalFailed(name:status:)`` if the keychain
     ///   delete operation fails.
-    func removeKey<K: BiometryCurrentSetProtectedKey>(_ key: K) throws(RemoveKeyError)
+    func removeKey(_ key: some BiometryCurrentSetProtectedKey) throws(RemoveKeyError)
 
     // MARK: - Enrollment
 
@@ -138,7 +137,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   `false` if enrollment is unchanged.
     /// - Throws: ``EnrollmentCheckError/lookupFailed(error:)`` if the storage
     ///   read fails unexpectedly.
-    func hasBiometricEnrollmentChanged<K: BiometryCurrentSetProtectedKey>(for key: K) throws(EnrollmentCheckError)
+    func hasBiometricEnrollmentChanged(for key: some BiometryCurrentSetProtectedKey) throws(EnrollmentCheckError)
         -> Bool
 
     // MARK: - PasswordProtectedKey
@@ -156,7 +155,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   - password: The application password to protect the private key.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    func create<K: PasswordProtectedKey>(key: K, password: Data) throws(CreateKeyError) -> Data
+    func create(key: some PasswordProtectedKey, password: Data) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``PasswordProtectedKey``.
     ///
@@ -174,7 +173,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Throws: ``EncryptError/keyNotFound(name:)`` if the key does not yet
     ///   exist; ``EncryptError/encryptionFailed(name:error:)`` if encryption
     ///   fails.
-    func encrypt<K: PasswordProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
+    func encrypt(data: Data, with key: some PasswordProtectedKey) throws(EncryptError) -> Data
 
     /// Encrypts `data` using the public key of a ``PasswordProtectedKey``,
     /// auto-creating the key if it does not yet exist.
@@ -189,7 +188,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   - password: The application password used to create the key if absent.
     /// - Returns: ECIES ciphertext (minimum 82 bytes).
     /// - Throws: ``EncryptError``
-    func encrypt<K: PasswordProtectedKey>(data: Data, with key: K, generateKeyWithPassword password: Data)
+    func encrypt(data: Data, with key: some PasswordProtectedKey, generateKeyWithPassword password: Data)
         throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``PasswordProtectedKey`` and returns a DER-encoded
@@ -204,7 +203,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   - password: The application password associated with this key.
     /// - Returns: DER-encoded P-256 ECDSA signature.
     /// - Throws: ``SignPasswordError``
-    func sign<K: PasswordProtectedKey>(payload: Data, with key: K, password: Data) throws(SignPasswordError) -> Data
+    func sign(payload: Data, with key: some PasswordProtectedKey, password: Data) throws(SignPasswordError) -> Data
 
     /// Performs ECDH key agreement using a ``PasswordProtectedKey`` and returns
     /// the 32-byte raw shared secret.
@@ -219,7 +218,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   - password: The application password associated with this key.
     /// - Returns: 32-byte raw ECDH shared secret (Z value).
     /// - Throws: ``DerivePasswordError``
-    func deriveSharedSecret<K: PasswordProtectedKey>(with key: K, publicKey: Data, password: Data)
+    func deriveSharedSecret(with key: some PasswordProtectedKey, publicKey: Data, password: Data)
         throws(DerivePasswordError) -> Data
 
     /// Decrypts ECIES-encoded data using a ``PasswordProtectedKey``.
@@ -234,7 +233,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///   - password: The application password associated with this key.
     /// - Returns: Decrypted plaintext.
     /// - Throws: ``DecryptPasswordError``
-    func decrypt<K: PasswordProtectedKey>(encodedData: Data, with key: K, password: Data) throws(DecryptPasswordError)
+    func decrypt(encodedData: Data, with key: some PasswordProtectedKey, password: Data) throws(DecryptPasswordError)
         -> Data
 
     // MARK: - BiometryAnyProtectedKey
@@ -248,12 +247,12 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @KeyManagementActor func create<K: BiometryAnyProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create(key: some BiometryAnyProtectedKey) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``BiometryAnyProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
     /// - Throws: ``EncryptError``
-    func encrypt<K: BiometryAnyProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
+    func encrypt(data: Data, with key: some BiometryAnyProtectedKey) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``BiometryAnyProtectedKey`` after biometric
     /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
@@ -262,7 +261,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// Pass a pre-evaluated context to avoid a second prompt.
     ///
     /// - Throws: ``SignBiometryAnyError``
-    @KeyManagementActor func sign<K: BiometryAnyProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign(payload: Data, with key: some BiometryAnyProtectedKey, laContext: LAContext?)
         throws(SignBiometryAnyError) -> Data
 
     /// Performs ECDH key agreement using a ``BiometryAnyProtectedKey`` after
@@ -270,8 +269,8 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveBiometryAnyError``
-    @KeyManagementActor func deriveSharedSecret<K: BiometryAnyProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some BiometryAnyProtectedKey,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveBiometryAnyError) -> Data
@@ -280,7 +279,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptBiometryAnyError``
-    @KeyManagementActor func decrypt<K: BiometryAnyProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func decrypt(encodedData: Data, with key: some BiometryAnyProtectedKey, laContext: LAContext?)
         throws(DecryptBiometryAnyError) -> Data
 
     // MARK: - BiometryCurrentSetProtectedKey
@@ -295,12 +294,12 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @KeyManagementActor func create<K: BiometryCurrentSetProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create(key: some BiometryCurrentSetProtectedKey) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``BiometryCurrentSetProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
     /// - Throws: ``EncryptError``
-    func encrypt<K: BiometryCurrentSetProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
+    func encrypt(data: Data, with key: some BiometryCurrentSetProtectedKey) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``BiometryCurrentSetProtectedKey`` after biometric
     /// authentication. Isolated to ``KeyManagementActor`` — never the main actor.
@@ -310,7 +309,7 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// biometrics have changed.
     ///
     /// - Throws: ``SignBiometryCurrentSetError``
-    @KeyManagementActor func sign<K: BiometryCurrentSetProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign(payload: Data, with key: some BiometryCurrentSetProtectedKey, laContext: LAContext?)
         throws(SignBiometryCurrentSetError) -> Data
 
     /// Performs ECDH key agreement using a ``BiometryCurrentSetProtectedKey``
@@ -318,8 +317,8 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveBiometryCurrentSetError``
-    @KeyManagementActor func deriveSharedSecret<K: BiometryCurrentSetProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some BiometryCurrentSetProtectedKey,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveBiometryCurrentSetError) -> Data
@@ -328,9 +327,9 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// biometric authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptBiometryCurrentSetError``
-    @KeyManagementActor func decrypt<K: BiometryCurrentSetProtectedKey>(
+    @KeyManagementActor func decrypt(
         encodedData: Data,
-        with key: K,
+        with key: some BiometryCurrentSetProtectedKey,
         laContext: LAContext?
     ) throws(DecryptBiometryCurrentSetError) -> Data
 
@@ -342,18 +341,18 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// - Parameter key: A descriptor identifying the key to create.
     /// - Returns: DER-encoded P-256 public key data (91 bytes).
     /// - Throws: ``CreateKeyError``
-    @KeyManagementActor func create<K: UserPresenceProtectedKey>(key: K) throws(CreateKeyError) -> Data
+    @KeyManagementActor func create(key: some UserPresenceProtectedKey) throws(CreateKeyError) -> Data
 
     /// Encrypts `data` using the public key of a ``UserPresenceProtectedKey``,
     /// auto-creating the key if it does not yet exist. No authentication required.
     /// - Throws: ``EncryptError``
-    func encrypt<K: UserPresenceProtectedKey>(data: Data, with key: K) throws(EncryptError) -> Data
+    func encrypt(data: Data, with key: some UserPresenceProtectedKey) throws(EncryptError) -> Data
 
     /// Signs `payload` using a ``UserPresenceProtectedKey`` after biometric or
     /// passcode authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``SignUserPresenceError``
-    @KeyManagementActor func sign<K: UserPresenceProtectedKey>(payload: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func sign(payload: Data, with key: some UserPresenceProtectedKey, laContext: LAContext?)
         throws(SignUserPresenceError) -> Data
 
     /// Performs ECDH key agreement using a ``UserPresenceProtectedKey`` after
@@ -361,8 +360,8 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     ///
     /// `publicKey` must be an x963-encoded (uncompressed, 65-byte) P-256 key.
     /// - Throws: ``DeriveUserPresenceError``
-    @KeyManagementActor func deriveSharedSecret<K: UserPresenceProtectedKey>(
-        with key: K,
+    @KeyManagementActor func deriveSharedSecret(
+        with key: some UserPresenceProtectedKey,
         publicKey: Data,
         laContext: LAContext?
     ) throws(DeriveUserPresenceError) -> Data
@@ -371,6 +370,6 @@ public protocol KeyManager: KeyManagerPasscodeOperations, KeyManagerUnprotectedO
     /// or passcode authentication. Isolated to ``KeyManagementActor`` — never the main actor.
     ///
     /// - Throws: ``DecryptUserPresenceError``
-    @KeyManagementActor func decrypt<K: UserPresenceProtectedKey>(encodedData: Data, with key: K, laContext: LAContext?)
+    @KeyManagementActor func decrypt(encodedData: Data, with key: some UserPresenceProtectedKey, laContext: LAContext?)
         throws(DecryptUserPresenceError) -> Data
 }

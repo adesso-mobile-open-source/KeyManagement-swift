@@ -10,19 +10,18 @@
 //  You may obtain a copy of the License at
 //  http://www.apache.org/licenses/LICENSE-2.0
 
+@testable import KeyManagement
 import PersistentStorage
+
 //
 //  KeyManagement
 //
 import Testing
 
-@testable import KeyManagement
-
 @Suite("KeyManager — read-only operations") struct KeyManagerReadOnlyTests {
+    struct AKey: PasswordProtectedKey { }
 
-    struct AKey: PasswordProtectedKey {}
-
-    @Test("hasKey forwards to backing store") func hasKey_forwards() throws {
+    @Test func `hasKey forwards to backing store`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store)
@@ -30,21 +29,21 @@ import Testing
         #expect(store.hasKeyCallCount == 1)
     }
 
-    @Test("hasKey maps store error to lookupFailed") func hasKey_mapsError() throws {
+    @Test func `hasKey maps store error to lookupFailed`() throws {
         let store = KeyStoreSpy()
         store.hasKeyError = .cannotGetPublicKey(name: "AKey", error: "oops")
         let mgr = makeManager(store: store)
         #expect(throws: HasKeyError.self) { try mgr.hasKey(AKey()) }
     }
 
-    @Test("getPublicKey throws keyNotFound when absent") func getPublicKey_keyNotFound() throws {
+    @Test func `getPublicKey throws keyNotFound when absent`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         let mgr = makeManager(store: store)
         #expect(throws: GetPublicKeyError.keyNotFound(name: "AKey")) { try mgr.getPublicKey(AKey()) }
     }
 
-    @Test("getPublicKey returns data when present") func getPublicKey_present() throws {
+    @Test func `getPublicKey returns data when present`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         store.getPublicKeyStub = Data([0x30, 0x01])
@@ -53,7 +52,7 @@ import Testing
         #expect(data == Data([0x30, 0x01]))
     }
 
-    @Test("encrypt throws keyNotFound when absent") func encrypt_keyNotFound() throws {
+    @Test func `encrypt throws keyNotFound when absent`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         let mgr = makeManager(store: store)
@@ -62,7 +61,7 @@ import Testing
         }
     }
 
-    @Test("removeKey calls store and clears config") func removeKey_clearsConfig() throws {
+    @Test func `removeKey calls store and clears config`() throws {
         let store = KeyStoreSpy()
         let configSpy = PersistentKeyValueStoreSpy()
         let configStore = KeyConfigurationStore(storage: configSpy)

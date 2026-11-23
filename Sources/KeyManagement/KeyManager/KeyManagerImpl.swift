@@ -50,19 +50,19 @@ public final class KeyManagerImpl: KeyManager, Sendable {
     ///   `"\(applicationTag).\(key.name)"`. Use the same value each time you
     ///   create a `KeyManagerImpl` — changing it makes existing keys invisible.
     public convenience init(applicationTag: String) {
-        #if targetEnvironment(simulator)
-            self.init(applicationTag: applicationTag, keyStore: SoftwareKeyStore())
-        #else
-            self.init(applicationTag: applicationTag, keyStore: SecureEnclaveKeyStore(applicationTag: applicationTag))
-        #endif
+#if targetEnvironment(simulator)
+        self.init(applicationTag: applicationTag, keyStore: SoftwareKeyStore())
+#else
+        self.init(applicationTag: applicationTag, keyStore: SecureEnclaveKeyStore(applicationTag: applicationTag))
+#endif
     }
 
     /// Injection init for tests — accepts any internal KeyStore.
     init(applicationTag: String, keyStore: any KeyStore) {
         self.applicationTag = applicationTag
         self.keyStore = keyStore
-        self.configStore = KeyConfigurationStore(applicationTag: applicationTag)
-        self.enrollmentMonitor = KeyEnrollmentStateMonitorImpl(applicationTag: applicationTag)
+        configStore = KeyConfigurationStore(applicationTag: applicationTag)
+        enrollmentMonitor = KeyEnrollmentStateMonitorImpl(applicationTag: applicationTag)
     }
 
     /// Fully injectable init for testing all internal dependencies.
@@ -81,17 +81,17 @@ public final class KeyManagerImpl: KeyManager, Sendable {
 
 // MARK: - Read-only methods
 
-extension KeyManagerImpl {
-
-    public func hasKey<K: KeyDescriptor>(_ key: K) throws(HasKeyError) -> Bool {
+public extension KeyManagerImpl {
+    func hasKey(_ key: some KeyDescriptor) throws(HasKeyError) -> Bool {
         do { return try keyStore.hasKey(named: key.name) } catch {
             throw .lookupFailed(name: key.name, error: error.localizedDescription)
         }
     }
 
-    public func getPublicKey<K: KeyDescriptor>(_ key: K) throws(GetPublicKeyError) -> Data {
+    func getPublicKey(_ key: some KeyDescriptor) throws(GetPublicKeyError) -> Data {
         do {
             guard try keyStore.hasKey(named: key.name) else { throw GetPublicKeyError.keyNotFound(name: key.name) }
+
             return try keyStore.getPublicKey(named: key.name)
         } catch let caughtError as GetPublicKeyError {
             throw caughtError
@@ -100,14 +100,14 @@ extension KeyManagerImpl {
         }
     }
 
-    public func removeKey<K: KeyDescriptor>(_ key: K) throws(RemoveKeyError) {
+    func removeKey(_ key: some KeyDescriptor) throws(RemoveKeyError) {
         do { try keyStore.removeSigningKey(named: key.name) } catch {
             throw .removalFailed(name: key.name, status: error.osstatus ?? errSecInternalError)
         }
         configStore.remove(forKeyNamed: key.name)
     }
 
-    public func removeKey<K: BiometryCurrentSetProtectedKey>(_ key: K) throws(RemoveKeyError) {
+    func removeKey(_ key: some BiometryCurrentSetProtectedKey) throws(RemoveKeyError) {
         do { try keyStore.removeSigningKey(named: key.name) } catch {
             throw .removalFailed(name: key.name, status: error.osstatus ?? errSecInternalError)
         }
@@ -115,17 +115,17 @@ extension KeyManagerImpl {
         enrollmentMonitor.clearEnrollmentState(forKeyNamed: key.name)
     }
 
-    public func hasBiometricEnrollmentChanged<K: BiometryCurrentSetProtectedKey>(for key: K)
+    func hasBiometricEnrollmentChanged(for key: some BiometryCurrentSetProtectedKey)
         throws(EnrollmentCheckError) -> Bool { try enrollmentMonitor.hasEnrollmentChanged(forKeyNamed: key.name) }
 }
 
 // MARK: - Internal helpers
 
 extension KeyManagerImpl {
-
-    func validateConfiguration<K: KeyDescriptor>(for key: K, trait: ProtectionTrait) -> ConfigValidation {
+    func validateConfiguration(for key: some KeyDescriptor, trait: ProtectionTrait) -> ConfigValidation {
         if let existing = configStore.record(forKeyNamed: key.name) {
             guard existing.trait == trait, existing.protectionMode == key.protectionMode else { return .mismatch }
+
             return .valid
         }
         configStore.store(

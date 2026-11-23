@@ -42,7 +42,7 @@
 ///
 /// let sig = try manager.sign(payload: challenge, with: DeviceAttestationKey())
 /// ```
-public protocol UnprotectedKey: KeyDescriptor {}
+public protocol UnprotectedKey: KeyDescriptor { }
 
 extension UnprotectedKey {
     static var protectionTrait: ProtectionTrait {

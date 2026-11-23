@@ -14,28 +14,26 @@
 //  KeyManagement
 //
 import CryptoKit
+@testable import KeyManagement
 import PersistentStorage
 import Testing
-
-@testable import KeyManagement
 
 // Helper key descriptors used across software store tests
 private struct SWPasswordKey: PasswordProtectedKey { let name: String }
 private struct SWUnprotectedKey: UnprotectedKey { let name: String }
 
 @Suite("SoftwareKeyStore") struct SoftwareKeyStoreTests {
-
     private func makeSUT() -> (SoftwareKeyStore, PersistentKeyValueStoreSpy) {
         let spy = PersistentKeyValueStoreSpy()
         return (SoftwareKeyStore(storage: spy), spy)
     }
 
-    @Test("hasKey returns false when key absent") func hasKey_absent() throws {
+    @Test func `hasKey returns false when key absent`() throws {
         let (sut, _) = makeSUT()
         #expect(try sut.hasKey(named: "missing") == false)
     }
 
-    @Test("createSigningKey then hasKey returns true") func createSigningKey_thenHasKey() throws {
+    @Test func `createSigningKey then hasKey returns true`() throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(
             named: "k",
@@ -46,7 +44,7 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(try sut.hasKey(named: "k") == true)
     }
 
-    @Test("getPublicKey returns 91-byte DER key") func getPublicKey_returns91Bytes() throws {
+    @Test func `getPublicKey returns 91-byte DER key`() throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(
             named: "k",
@@ -59,12 +57,12 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(pub.count == 91)
     }
 
-    @Test("getPublicKey throws when key absent") func getPublicKey_absent() throws {
+    @Test func `getPublicKey throws when key absent`() throws {
         let (sut, _) = makeSUT()
         #expect(throws: KeyStoreError.self) { try sut.getPublicKey(named: "missing") }
     }
 
-    @Test("sign with correct password returns DER signature") func sign_correctPassword() throws {
+    @Test func `sign with correct password returns DER signature`() throws {
         let (sut, _) = makeSUT()
         let pwd = Data("pw".utf8)
         try sut.createSigningKey(
@@ -77,7 +75,7 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(sig.starts(with: [0x30]))
     }
 
-    @Test("sign with wrong password throws cannotSignDataInvalidPassword") func sign_wrongPassword() throws {
+    @Test func `sign with wrong password throws cannotSignDataInvalidPassword`() throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(
             named: "k",
@@ -90,7 +88,7 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         }
     }
 
-    @Test("sign with .none credential always succeeds for unprotected key") func sign_noneCredential() throws {
+    @Test func `sign with .none credential always succeeds for unprotected key`() throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(
             named: "k",
@@ -102,7 +100,7 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(sig.starts(with: [0x30]))
     }
 
-    @Test("removeSigningKey removes key") func removeSigningKey() throws {
+    @Test func `removeSigningKey removes key`() throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(
             named: "k",
@@ -114,21 +112,21 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(try sut.hasKey(named: "k") == false)
     }
 
-    @Test("injectKey for PasswordProtectedKey then hasKey returns true") func injectKey_password() throws {
+    @Test func `injectKey for PasswordProtectedKey then hasKey returns true`() throws {
         let (sut, _) = makeSUT()
         let key = SWPasswordKey(name: "imported")
         try sut.injectKey(key, password: Data("pw".utf8), privateKeyDER: P256.Signing.PrivateKey().derRepresentation)
         #expect(try sut.hasKey(named: "imported") == true)
     }
 
-    @Test("injectKey for UnprotectedKey then hasKey returns true") func injectKey_unprotected() throws {
+    @Test func `injectKey for UnprotectedKey then hasKey returns true`() throws {
         let (sut, _) = makeSUT()
         let key = SWUnprotectedKey(name: "bare")
         try sut.injectKey(key, privateKeyDER: P256.Signing.PrivateKey().derRepresentation)
         #expect(try sut.hasKey(named: "bare") == true)
     }
 
-    @Test("init loads persisted keys from storage") func init_loadsFromStorage() throws {
+    @Test func `init loads persisted keys from storage`() throws {
         let spy = PersistentKeyValueStoreSpy()
         let first = SoftwareKeyStore(storage: spy)
         try first.createSigningKey(
@@ -141,14 +139,14 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(try second.hasKey(named: "k") == true)
     }
 
-    @Test("init with corrupted storage loads empty set") func init_corruptedStorage() throws {
+    @Test func `init with corrupted storage loads empty set`() throws {
         let spy = PersistentKeyValueStoreSpy()
         try spy.set(data: Data("garbage".utf8), for: "adesso_signing_keys")
         let sut = SoftwareKeyStore(storage: spy)
         #expect(try sut.hasKey(named: "anything") == false)
     }
 
-    @Test("deriveSharedSecret returns 32-byte shared secret") func deriveSharedSecret() throws {
+    @Test func `deriveSharedSecret returns 32-byte shared secret`() throws {
         let (sut, _) = makeSUT()
         let pwd = Data("secret".utf8)
         try sut.createSigningKey(
@@ -166,7 +164,7 @@ private struct SWUnprotectedKey: UnprotectedKey { let name: String }
         #expect(secret.count == 32)
     }
 
-    @Test("deriveSharedSecret with wrong password throws invalidPassword") func deriveSharedSecret_wrongPassword()
+    @Test func `deriveSharedSecret with wrong password throws invalidPassword`()
         throws {
         let (sut, _) = makeSUT()
         try sut.createSigningKey(

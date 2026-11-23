@@ -10,17 +10,15 @@
 //  You may obtain a copy of the License at
 //  http://www.apache.org/licenses/LICENSE-2.0
 
-import PersistentStorage
-import Testing
-
 //
 //  KeyManagement
 //
 @testable import KeyManagement
+import PersistentStorage
+import Testing
 
 @Suite("KeyStoreDecryption") struct KeyStoreDecryptionTests {
-
-    @Test("decrypt with short payload throws invalidPayload") func decrypt_shortPayload() throws {
+    @Test func `decrypt with short payload throws invalidPayload`() throws {
         let spy = KeyStoreSpy()
         // KeyStoreSpy.decrypt stub returns decryptStub by default;
         // the real implementations throw .invalidPayload for short payloads.
@@ -31,7 +29,7 @@ import Testing
         }
     }
 
-    @Test("decrypt propagates store error") func decrypt_storeError() throws {
+    @Test func `decrypt propagates store error`() throws {
         let spy = KeyStoreSpy()
         spy.decryptError = .decryptionFailed(error: "mock")
         #expect(throws: KeyStoreError.decryptionFailed(error: "mock")) {
@@ -39,7 +37,7 @@ import Testing
         }
     }
 
-    @Test("SoftwareKeyStore decrypt with valid roundtrip") func softwareStore_encrypt_decrypt_roundtrip() throws {
+    @Test func `SoftwareKeyStore decrypt with valid roundtrip`() throws {
         let sut = SoftwareKeyStore(storage: PersistentKeyValueStoreSpy())
         try sut.createSigningKey(
             named: "k",
@@ -53,8 +51,8 @@ import Testing
         #expect(recovered == plaintext)
     }
 
-    @Test("SoftwareKeyStore decrypt with wrong password throws invalidPassword")
-    func softwareStore_decrypt_wrongPassword() throws {
+    @Test
+    func `SoftwareKeyStore decrypt with wrong password throws invalidPassword`() throws {
         let sut = SoftwareKeyStore(storage: PersistentKeyValueStoreSpy())
         try sut.createSigningKey(
             named: "k",
@@ -68,7 +66,7 @@ import Testing
         }
     }
 
-    @Test("SoftwareKeyStore decrypt with short payload throws invalidPayload") func softwareStore_decrypt_shortPayload()
+    @Test func `SoftwareKeyStore decrypt with short payload throws invalidPayload`()
         throws {
         let sut = SoftwareKeyStore(storage: PersistentKeyValueStoreSpy())
         try sut.createSigningKey(

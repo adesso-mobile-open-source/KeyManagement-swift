@@ -25,7 +25,6 @@ import Testing
 
 @Suite("UnprotectedKey — Integration")
 struct UnprotectedKeyIntegrationTests {
-
     struct DeviceSigningKey: UnprotectedKey { let name = "integration.unprotected.signing" }
     struct DeviceDecryptKey: UnprotectedKey { let name = "integration.unprotected.decrypt" }
     struct DeviceDeriveKey: UnprotectedKey { let name = "integration.unprotected.derive" }
@@ -40,21 +39,21 @@ struct UnprotectedKeyIntegrationTests {
 
     // MARK: - hasKey / removeKey
 
-    @Test("hasKey returns false before first write")
-    func hasKey_returnsFalseBeforeCreate() throws {
+    @Test
+    func `hasKey returns false before first write`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         #expect(try manager.hasKey(DeviceSigningKey()) == false)
     }
 
-    @Test("hasKey returns true after auto-create via sign")
-    func hasKey_returnsTrueAfterAutoCreate() throws {
+    @Test
+    func `hasKey returns true after auto-create via sign`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceSigningKey())
         #expect(try manager.hasKey(DeviceSigningKey()) == true)
     }
 
-    @Test("removeKey clears the key")
-    func removeKey_clearsKey() throws {
+    @Test
+    func `removeKey clears the key`() throws {
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceSigningKey())
         try manager.removeKey(DeviceSigningKey())
         #expect(try manager.hasKey(DeviceSigningKey()) == false)
@@ -62,16 +61,16 @@ struct UnprotectedKeyIntegrationTests {
 
     // MARK: - getPublicKey
 
-    @Test("getPublicKey throws keyNotFound before first write")
-    func getPublicKey_throwsKeyNotFoundBeforeCreate() throws {
+    @Test
+    func `getPublicKey throws keyNotFound before first write`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         #expect(throws: GetPublicKeyError.keyNotFound(name: DeviceSigningKey().name)) {
             try manager.getPublicKey(DeviceSigningKey())
         }
     }
 
-    @Test("getPublicKey returns 91-byte DER-encoded P-256 key")
-    func getPublicKey_returnsDER() throws {
+    @Test
+    func `getPublicKey returns 91-byte DER-encoded P-256 key`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceSigningKey())
         let pub = try manager.getPublicKey(DeviceSigningKey())
@@ -81,8 +80,8 @@ struct UnprotectedKeyIntegrationTests {
 
     // MARK: - sign roundtrip
 
-    @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() throws {
+    @Test
+    func `sign produces a verifiable ECDSA signature`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         let payload = Data("Device identity payload".utf8)
         let signature = try manager.sign(payload: payload, with: DeviceSigningKey())
@@ -91,16 +90,16 @@ struct UnprotectedKeyIntegrationTests {
         #expect(publicKey.isValidSignature(ecdsaSignature, for: payload))
     }
 
-    @Test("Different payloads produce different signatures")
-    func sign_differentPayloadsProduceDifferentSignatures() throws {
+    @Test
+    func `Different payloads produce different signatures`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         let sig1 = try manager.sign(payload: Data("payload1".utf8), with: DeviceSigningKey())
         let sig2 = try manager.sign(payload: Data("payload2".utf8), with: DeviceSigningKey())
         #expect(sig1 != sig2)
     }
 
-    @Test("Repeated sign calls reuse the same key")
-    func sign_secondCallReusesKey() throws {
+    @Test
+    func `Repeated sign calls reuse the same key`() throws {
         defer { try? manager.removeKey(DeviceSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceSigningKey())
         let pub1 = try manager.getPublicKey(DeviceSigningKey())
@@ -111,8 +110,8 @@ struct UnprotectedKeyIntegrationTests {
 
     // MARK: - encrypt / decrypt roundtrip
 
-    @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() throws {
+    @Test
+    func `encrypt then decrypt recovers original plaintext`() throws {
         defer { try? manager.removeKey(DeviceDecryptKey()) }
         let plaintext = Data("Device-bound secret — no auth needed 🔑".utf8)
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceDecryptKey())
@@ -121,16 +120,16 @@ struct UnprotectedKeyIntegrationTests {
         #expect(recovered == plaintext)
     }
 
-    @Test("encrypt output has ECIES overhead (> 81 bytes)")
-    func encrypt_producesECIESOverhead() throws {
+    @Test
+    func `encrypt output has ECIES overhead (> 81 bytes)`() throws {
         defer { try? manager.removeKey(DeviceDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceDecryptKey())
         let ciphertext = try manager.encrypt(data: Data("hello".utf8), with: DeviceDecryptKey())
         #expect(ciphertext.count > 81)
     }
 
-    @Test("decrypt with short payload throws invalidPayload")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    @Test
+    func `decrypt with short payload throws invalidPayload`() throws {
         defer { try? manager.removeKey(DeviceDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceDecryptKey())
         #expect(throws: DecryptUnprotectedError.invalidPayload) {
@@ -138,8 +137,8 @@ struct UnprotectedKeyIntegrationTests {
         }
     }
 
-    @Test("encrypt autocreates key when key has not been created")
-    func encrypt_autocreatesKeyIfNotCreated() throws {
+    @Test
+    func `encrypt autocreates key when key has not been created`() throws {
         defer { try? manager.removeKey(DeviceDecryptKey()) }
         _ = try manager.encrypt(data: Data("x".utf8), with: DeviceDecryptKey())
         #expect(try manager.hasKey(DeviceDecryptKey()))
@@ -147,8 +146,8 @@ struct UnprotectedKeyIntegrationTests {
 
     // MARK: - deriveSharedSecret roundtrip
 
-    @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() throws {
+    @Test
+    func `deriveSharedSecret matches the ephemeral-side computation`() throws {
         defer { try? manager.removeKey(DeviceDeriveKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceDeriveKey())
         let ephemeralPriv = P256.KeyAgreement.PrivateKey()
@@ -161,8 +160,8 @@ struct UnprotectedKeyIntegrationTests {
         #expect(ourSecret == theirSecret)
     }
 
-    @Test("deriveSharedSecret with invalid ephemeral key throws")
-    func deriveSharedSecret_invalidEphemeralKeyThrows() throws {
+    @Test
+    func `deriveSharedSecret with invalid ephemeral key throws`() throws {
         defer { try? manager.removeKey(DeviceDeriveKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: DeviceDeriveKey())
         #expect(throws: DeriveUnprotectedError.self) {

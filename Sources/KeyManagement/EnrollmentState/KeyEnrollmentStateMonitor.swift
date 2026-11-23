@@ -49,12 +49,12 @@ final class KeyEnrollmentStateMonitorImpl: KeyEnrollmentStateMonitor, Sendable {
 
     /// Production initialiser.
     init(applicationTag: String) {
-        self.storage = PersistentKeyValueStoreImpl(
+        storage = PersistentKeyValueStoreImpl(
             dataStore: .userDefaults(
                 UserDefaults(suiteName: "\(applicationTag).enrollment_states") ?? .standard
             )
         )
-        self.contextFactory = { LAContext() }
+        contextFactory = { LAContext() }
     }
 
     /// Testable initialiser.
@@ -70,6 +70,7 @@ final class KeyEnrollmentStateMonitorImpl: KeyEnrollmentStateMonitor, Sendable {
         let context = contextFactory()
         context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: nil)
         guard let domainState = context.evaluatedPolicyDomainState else { return }
+
         try? storage.set(data: domainState, for: storageKey(for: name))
     }
 
@@ -79,11 +80,12 @@ final class KeyEnrollmentStateMonitorImpl: KeyEnrollmentStateMonitor, Sendable {
 
         do {
             guard let current = context.evaluatedPolicyDomainState,
-                let stored = try storage.get(dataFor: storageKey(for: name))
+                  let stored = try storage.get(dataFor: storageKey(for: name))
             else {
                 // No baseline or no current state — treat as changed (conservative).
                 return true
             }
+
             return current != stored
         } catch {
             throw .lookupFailed(error: error.localizedDescription)

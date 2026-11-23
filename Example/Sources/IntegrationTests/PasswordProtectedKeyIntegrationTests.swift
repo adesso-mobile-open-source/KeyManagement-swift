@@ -25,7 +25,6 @@ import Testing
 
 @Suite("PasswordProtectedKey — Integration")
 struct PasswordProtectedKeyIntegrationTests {
-
     // MARK: - Key descriptors
 
     struct AppSigningKey: PasswordProtectedKey { let name = "integration.password.signing" }
@@ -35,7 +34,7 @@ struct PasswordProtectedKeyIntegrationTests {
     // MARK: - State
 
     let manager = KeyManagerImpl(applicationTag: integrationAppTag)
-    let password      = Data("correct-horse-battery-staple".utf8)
+    let password = Data("correct-horse-battery-staple".utf8)
     let wrongPassword = Data("wrong".utf8)
 
     init() {
@@ -46,21 +45,21 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - hasKey / removeKey
 
-    @Test("hasKey returns false before first write")
-    func hasKey_returnsFalseBeforeCreate() throws {
+    @Test
+    func `hasKey returns false before first write`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         #expect(try manager.hasKey(AppSigningKey()) == false)
     }
 
-    @Test("hasKey returns true after auto-create via sign")
-    func hasKey_returnsTrueAfterAutoCreate() throws {
+    @Test
+    func `hasKey returns true after auto-create via sign`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppSigningKey(), password: password)
         #expect(try manager.hasKey(AppSigningKey()) == true)
     }
 
-    @Test("removeKey clears the key")
-    func removeKey_clearsKey() throws {
+    @Test
+    func `removeKey clears the key`() throws {
         _ = try manager.sign(payload: Data("x".utf8), with: AppSigningKey(), password: password)
         try manager.removeKey(AppSigningKey())
         #expect(try manager.hasKey(AppSigningKey()) == false)
@@ -68,16 +67,16 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - getPublicKey
 
-    @Test("getPublicKey throws keyNotFound before first write")
-    func getPublicKey_throwsKeyNotFoundBeforeCreate() throws {
+    @Test
+    func `getPublicKey throws keyNotFound before first write`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         #expect(throws: GetPublicKeyError.keyNotFound(name: AppSigningKey().name)) {
             try manager.getPublicKey(AppSigningKey())
         }
     }
 
-    @Test("getPublicKey returns 91-byte DER-encoded P-256 key")
-    func getPublicKey_returnsDER() throws {
+    @Test
+    func `getPublicKey returns 91-byte DER-encoded P-256 key`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppSigningKey(), password: password)
         let pub = try manager.getPublicKey(AppSigningKey())
@@ -87,8 +86,8 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - sign roundtrip
 
-    @Test("sign produces a verifiable ECDSA signature")
-    func sign_producesVerifiableSignature() throws {
+    @Test
+    func `sign produces a verifiable ECDSA signature`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         let payload = Data("The quick brown fox".utf8)
         let signature = try manager.sign(payload: payload, with: AppSigningKey(), password: password)
@@ -97,8 +96,8 @@ struct PasswordProtectedKeyIntegrationTests {
         #expect(publicKey.isValidSignature(ecdsaSignature, for: payload))
     }
 
-    @Test("sign with wrong password throws invalidPassword")
-    func sign_wrongPasswordThrowsInvalidPassword() throws {
+    @Test
+    func `sign with wrong password throws invalidPassword`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppSigningKey(), password: password)
         #expect(throws: SignPasswordError.invalidPassword(name: AppSigningKey().name)) {
@@ -106,8 +105,8 @@ struct PasswordProtectedKeyIntegrationTests {
         }
     }
 
-    @Test("Repeated sign calls use the same key")
-    func sign_secondCallReusesKey() throws {
+    @Test
+    func `Repeated sign calls use the same key`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         let payload = Data("hello".utf8)
         _ = try manager.sign(payload: payload, with: AppSigningKey(), password: password)
@@ -119,8 +118,8 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - encrypt / decrypt roundtrip
 
-    @Test("encrypt then decrypt recovers original plaintext")
-    func encrypt_decrypt_roundtrip() throws {
+    @Test
+    func `encrypt then decrypt recovers original plaintext`() throws {
         defer { try? manager.removeKey(AppDecryptKey()) }
         let plaintext = Data("Sensitive payload 🔑".utf8)
         _ = try manager.sign(payload: Data("x".utf8), with: AppDecryptKey(), password: password)
@@ -129,16 +128,16 @@ struct PasswordProtectedKeyIntegrationTests {
         #expect(recovered == plaintext)
     }
 
-    @Test("encrypt output has ECIES overhead (> 81 bytes)")
-    func encrypt_producesOverhead() throws {
+    @Test
+    func `encrypt output has ECIES overhead (> 81 bytes)`() throws {
         defer { try? manager.removeKey(AppDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppDecryptKey(), password: password)
         let ciphertext = try manager.encrypt(data: Data("hello".utf8), with: AppDecryptKey())
         #expect(ciphertext.count > 81)
     }
 
-    @Test("decrypt with wrong password throws invalidPassword")
-    func decrypt_wrongPasswordThrowsInvalidPassword() throws {
+    @Test
+    func `decrypt with wrong password throws invalidPassword`() throws {
         defer { try? manager.removeKey(AppDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppDecryptKey(), password: password)
         let ciphertext = try manager.encrypt(data: Data("secret".utf8), with: AppDecryptKey())
@@ -147,8 +146,8 @@ struct PasswordProtectedKeyIntegrationTests {
         }
     }
 
-    @Test("decrypt with short payload throws invalidPayload")
-    func decrypt_shortPayloadThrowsInvalidPayload() throws {
+    @Test
+    func `decrypt with short payload throws invalidPayload`() throws {
         defer { try? manager.removeKey(AppDecryptKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppDecryptKey(), password: password)
         #expect(throws: DecryptPasswordError.invalidPayload) {
@@ -158,8 +157,8 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - deriveSharedSecret roundtrip
 
-    @Test("deriveSharedSecret matches the ephemeral-side computation")
-    func deriveSharedSecret_matchesEphemeralSide() throws {
+    @Test
+    func `deriveSharedSecret matches the ephemeral-side computation`() throws {
         defer { try? manager.removeKey(AppDeriveKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppDeriveKey(), password: password)
         let ephemeralPriv = P256.KeyAgreement.PrivateKey()
@@ -172,8 +171,8 @@ struct PasswordProtectedKeyIntegrationTests {
         #expect(ourSecret == theirSecret)
     }
 
-    @Test("deriveSharedSecret with wrong password throws invalidPassword")
-    func deriveSharedSecret_wrongPasswordThrows() throws {
+    @Test
+    func `deriveSharedSecret with wrong password throws invalidPassword`() throws {
         defer { try? manager.removeKey(AppDeriveKey()) }
         _ = try manager.sign(payload: Data("x".utf8), with: AppDeriveKey(), password: password)
         #expect(throws: DerivePasswordError.invalidPassword(name: AppDeriveKey().name)) {
@@ -186,9 +185,9 @@ struct PasswordProtectedKeyIntegrationTests {
 
     // MARK: - configurationMismatch
 
-    @Test("Using same key name with different trait throws configurationMismatch")
+    @Test
     @KeyManagementActor
-    func configurationMismatch_differentTrait() throws {
+    func `Using same key name with different trait throws configurationMismatch`() throws {
         defer { try? manager.removeKey(AppSigningKey()) }
         struct BiometryKey: BiometryAnyProtectedKey { let name = "integration.password.signing" }
         _ = try manager.sign(payload: Data("x".utf8), with: AppSigningKey(), password: password)

@@ -45,7 +45,7 @@ let package = Package(
         ),
         .testTarget(
             name: "KeyManagementTests",
-            dependencies: [ "KeyManagement" ]
+            dependencies: ["KeyManagement"]
         ),
         .testTarget(
             name: "KeyManagementMacrosTests",

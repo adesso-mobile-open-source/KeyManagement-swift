@@ -10,20 +10,19 @@
 //  You may obtain a copy of the License at
 //  http://www.apache.org/licenses/LICENSE-2.0
 
+@testable import KeyManagement
 import PersistentStorage
+
 //
 //  KeyManagement
 //
 import Testing
 
-@testable import KeyManagement
-
 @Suite("KeyManager — PasswordProtectedKey") struct KeyManagerPasswordProtectedTests {
-
     struct TestKey: PasswordProtectedKey { let name = "TestKey" }
     let pwd = Data("secret".utf8)
 
-    @Test("Auto-creates key on first sign when absent") func autoCreatesOnFirstSign() throws {
+    @Test func `Auto-creates key on first sign when absent`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         store.signStub = Data(repeating: 0xAB, count: 64)
@@ -32,7 +31,7 @@ import Testing
         #expect(store.createCallCount == 1)
     }
 
-    @Test("Does not re-create when key already exists") func doesNotRecreate() throws {
+    @Test func `Does not re-create when key already exists`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store)
@@ -40,7 +39,7 @@ import Testing
         #expect(store.createCallCount == 0)
     }
 
-    @Test("Throws configurationMismatch when trait differs") func throwsConfigMismatch() throws {
+    @Test func `Throws configurationMismatch when trait differs`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         let mgr = makeManager(store: store, storedTrait: .biometryAny)
@@ -49,7 +48,7 @@ import Testing
         }
     }
 
-    @Test("Maps invalidPassword store error") func mapsInvalidPassword() throws {
+    @Test func `Maps invalidPassword store error`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = true
         store.signError = .cannotSignDataInvalidPassword(name: "TestKey")
@@ -59,7 +58,7 @@ import Testing
         }
     }
 
-    @Test("Throws keyCreationFailed when auto-create fails") func throwsKeyCreationFailed() throws {
+    @Test func `Throws keyCreationFailed when auto-create fails`() throws {
         let store = KeyStoreSpy()
         store.hasKeyStub = false
         store.createError = .cannotCreateKey(error: "SE error")
@@ -67,14 +66,14 @@ import Testing
         #expect(throws: SignPasswordError.self) { try mgr.sign(payload: Data(), with: TestKey(), password: pwd) }
     }
 
-    @Test("Decrypt rejects payload shorter than 82 bytes") func decryptRejectsShortPayload() throws {
+    @Test func `Decrypt rejects payload shorter than 82 bytes`() throws {
         let mgr = makeManager(store: KeyStoreSpy())
         #expect(throws: DecryptPasswordError.invalidPayload) {
             try mgr.decrypt(encodedData: Data(repeating: 0, count: 81), with: TestKey(), password: pwd)
         }
     }
 
-    @Test("removeKey clears config record") func removeKeyClearsConfig() throws {
+    @Test func `removeKey clears config record`() throws {
         let store = KeyStoreSpy()
         let configSpy = PersistentKeyValueStoreSpy()
         let configStore = KeyConfigurationStore(storage: configSpy)

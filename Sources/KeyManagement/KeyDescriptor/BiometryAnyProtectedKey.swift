@@ -48,7 +48,7 @@
 /// // so the call runs off the main thread.
 /// let sig = try await manager.sign(payload: data, with: BiometricKey(), laContext: nil)
 /// ```
-public protocol BiometryAnyProtectedKey: KeyDescriptor {}
+public protocol BiometryAnyProtectedKey: KeyDescriptor { }
 
 extension BiometryAnyProtectedKey {
     static var protectionTrait: ProtectionTrait {

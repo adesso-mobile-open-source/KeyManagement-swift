@@ -32,7 +32,6 @@ import Security
 /// }
 /// ```
 public enum ProtectionMode: String, Codable, Sendable {
-
     /// The item is accessible while the device is unlocked.
     ///
     /// The item migrates to a new device via encrypted backup or iCloud Keychain.
