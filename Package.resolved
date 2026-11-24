@@ -1,5 +1,5 @@
 {
-  "originHash" : "99acf6c44c61900c17e610b768c2991cc87bf2436212cdcd88561cdafc282836",
+  "originHash" : "f826f6fec7ed47e1d825e447d04cfe513317971186a349efae0f3014b57dbed6",
   "pins" : [
     {
       "identity" : "persistentstorage-swift",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax.git",
       "state" : {
-        "revision" : "64889f0c732f210a935a0ad7cda38f77f876262d",
-        "version" : "509.1.1"
+        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
+        "version" : "601.0.1"
       }
     }
   ],
